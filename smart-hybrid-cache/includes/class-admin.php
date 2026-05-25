@@ -112,6 +112,13 @@ $text = __( 'Object cache drop-in removed.', 'smart-hybrid-cache' );
 Smart_Hybrid_Cache_Logger::log( 'dropin_removed', $text );
 }
 break;
+case 'download_diagnostics':
+$snapshot = Smart_Hybrid_Cache_Diagnostics::snapshot();
+nocache_headers();
+header( 'Content-Type: application/json; charset=utf-8' );
+header( 'Content-Disposition: attachment; filename="smart-hybrid-cache-diagnostics-' . gmdate( 'Ymd-His' ) . '.json"' );
+echo wp_json_encode( $snapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+exit;
 default:
 $type = 'error';
 $text = __( 'Unknown action.', 'smart-hybrid-cache' );
@@ -191,6 +198,9 @@ $status  = Smart_Hybrid_Cache_Health_Check::get_status( $this->manager );
 <?php $this->checkbox_row( 'cleanup_dropin_uninstall', __( 'Cleanup drop-in on uninstall', 'smart-hybrid-cache' ), $options['cleanup_dropin_uninstall'] ); ?>
 <?php $this->checkbox_row( 'cleanup_dropin_deactivate', __( 'Cleanup drop-in on deactivation', 'smart-hybrid-cache' ), $options['cleanup_dropin_deactivate'] ); ?>
 <?php $this->checkbox_row( 'enable_logging', __( 'Enable event logging', 'smart-hybrid-cache' ), $options['enable_logging'] ); ?>
+<?php $this->text_row( 'non_persistent_groups', __( 'Non-persistent groups', 'smart-hybrid-cache' ), $options['non_persistent_groups'] ); ?>
+<?php $this->text_row( 'additional_global_groups', __( 'Additional global groups', 'smart-hybrid-cache' ), $options['additional_global_groups'] ); ?>
+<p class="description"><?php esc_html_e( 'Comma-separated cache group names. Non-persistent groups stay in request-scope memory only. Additional global groups are shared across multisite blogs.', 'smart-hybrid-cache' ); ?></p>
 </tbody></table>
 </div>
 <div class="shc-settings-submit">
@@ -283,6 +293,7 @@ $actions = array(
 'install_dropin' => array( __( 'Install object cache drop-in', 'smart-hybrid-cache' ), __( 'Enable persistent object caching when no other drop-in owns object-cache.php.', 'smart-hybrid-cache' ) ),
 'remove_dropin'  => array( __( 'Remove object cache drop-in', 'smart-hybrid-cache' ), __( 'Remove only the drop-in created by Smart Hybrid Cache unless replacement is confirmed.', 'smart-hybrid-cache' ) ),
 'show_status'    => array( __( 'Show current status', 'smart-hybrid-cache' ), __( 'Refresh dashboard status and recent events.', 'smart-hybrid-cache' ) ),
+'download_diagnostics' => array( __( 'Download diagnostics report', 'smart-hybrid-cache' ), __( 'Export a JSON report (Redis password redacted) suitable for support requests.', 'smart-hybrid-cache' ) ),
 );
 ?>
 <h2><?php esc_html_e( 'Admin Actions', 'smart-hybrid-cache' ); ?></h2>

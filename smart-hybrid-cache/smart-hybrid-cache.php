@@ -29,6 +29,8 @@ require_once SMART_HYBRID_CACHE_PATH . 'includes/class-memcached-client.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-dropin-installer.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-cache-manager.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-health-check.php';
+require_once SMART_HYBRID_CACHE_PATH . 'includes/class-diagnostics.php';
+require_once SMART_HYBRID_CACHE_PATH . 'includes/class-site-health.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-admin.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-cli.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-plugin.php';

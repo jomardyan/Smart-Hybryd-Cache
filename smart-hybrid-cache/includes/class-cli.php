@@ -82,4 +82,18 @@ public function remove_dropin( array $args = array(), array $assoc_args = array(
 $result = Smart_Hybrid_Cache_Dropin_Installer::remove( ! empty( $assoc_args['force'] ) );
 is_wp_error( $result ) ? \WP_CLI::error( $result->get_error_message() ) : \WP_CLI::success( 'Object cache drop-in removed.' );
 }
+
+/**
+ * Print a JSON diagnostics report (Redis password redacted).
+ *
+ * ## OPTIONS
+ *
+ * [--pretty]
+ * : Pretty-print the JSON output.
+ */
+public function diagnostics( array $args = array(), array $assoc_args = array() ): void {
+$snapshot = Smart_Hybrid_Cache_Diagnostics::snapshot();
+$flags    = ! empty( $assoc_args['pretty'] ) ? ( JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) : JSON_UNESCAPED_SLASHES;
+\WP_CLI::line( (string) wp_json_encode( $snapshot, $flags ) );
+}
 }
