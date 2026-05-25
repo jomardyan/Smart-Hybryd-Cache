@@ -297,7 +297,7 @@ $this->non_persistent_groups = array_values( array_unique( $this->non_persistent
 }
 
 public function stats(): void {
-echo esc_html( 'Smart Hybrid Cache hits: ' . $this->cache_hits . ', misses: ' . $this->cache_misses . ', engine: ' . $this->engine );
+echo htmlspecialchars( 'Smart Hybrid Cache hits: ' . $this->cache_hits . ', misses: ' . $this->cache_misses . ', engine: ' . $this->engine, ENT_QUOTES, 'UTF-8' );
 }
 
 private function persistent_key( string $key, string $group ): string {
@@ -366,6 +366,7 @@ function wp_cache_flush() { return $GLOBALS['wp_object_cache']->flush(); }
 function wp_cache_incr( $key, $offset = 1, $group = '' ) { return $GLOBALS['wp_object_cache']->incr( (string) $key, (int) $offset, (string) $group ); }
 function wp_cache_decr( $key, $offset = 1, $group = '' ) { return $GLOBALS['wp_object_cache']->decr( (string) $key, (int) $offset, (string) $group ); }
 function wp_cache_get_multiple( $keys, $group = '', $force = false ) { return $GLOBALS['wp_object_cache']->get_multiple( (array) $keys, (string) $group, (bool) $force ); }
+function wp_cache_add_multiple( array $data, $group = '', $expire = 0 ) { $result = true; foreach ( $data as $key => $value ) { $result = wp_cache_add( (string) $key, $value, (string) $group, (int) $expire ) && $result; } return $result; }
 function wp_cache_set_multiple( array $data, $group = '', $expire = 0 ) { return $GLOBALS['wp_object_cache']->set_multiple( $data, (string) $group, (int) $expire ); }
 function wp_cache_delete_multiple( array $keys, $group = '' ) { return $GLOBALS['wp_object_cache']->delete_multiple( $keys, (string) $group ); }
 function wp_cache_add_global_groups( $groups ) { $GLOBALS['wp_object_cache']->add_global_groups( $groups ); }

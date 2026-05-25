@@ -56,7 +56,7 @@ return $this->memcached instanceof Memcached ? $this->memcached->get( $key ) : f
 }
 
 public function get_result_code(): int {
-return $this->memcached instanceof Memcached ? $this->memcached->getResultCode() : Memcached::RES_FAILURE;
+return $this->memcached instanceof Memcached ? $this->memcached->getResultCode() : 1;
 }
 
 public function set( string $key, mixed $value, int $ttl = 0 ): bool {
