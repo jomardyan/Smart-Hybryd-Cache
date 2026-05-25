@@ -22,12 +22,19 @@ if ( is_admin() ) {
 ( new Smart_Hybrid_Cache_Admin( self::$manager ) )->hooks();
 }
 
+add_action( 'update_option_' . SMART_HYBRID_CACHE_OPTION, array( __CLASS__, 'settings_updated' ), 10, 3 );
 Smart_Hybrid_Cache_CLI::register();
 do_action( 'smart_hybrid_cache_loaded', self::$manager );
 }
 
 public static function manager(): ?Smart_Hybrid_Cache_Manager {
 return self::$manager;
+}
+
+public static function settings_updated( mixed $old_value, mixed $value, string $option ): void {
+if ( is_array( $value ) && ! empty( $value['enable_dropin'] ) ) {
+	Smart_Hybrid_Cache_Dropin_Installer::install( false );
+}
 }
 
 public static function activate(): void {

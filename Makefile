@@ -8,15 +8,15 @@ PHP_FILES=$(shell find $(PLUGIN_SLUG) -name '*.php')
 all: lint build
 
 lint:
-@for file in $(PHP_FILES); do php -l $$file; done
+	@for file in $(PHP_FILES); do php -l $$file; done
 
 build: clean lint
-@mkdir -p $(BUILD_DIR)
-@zip -qr $(ZIP) $(PLUGIN_SLUG) -x '*/.DS_Store'
-@echo "Built $(ZIP)"
+	@mkdir -p $(BUILD_DIR)
+	@zip -qr $(ZIP) $(PLUGIN_SLUG) -x '*/.DS_Store'
+	@echo "Built $(ZIP)"
 
 clean:
-@rm -rf $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR)
 
 tree:
-@find $(PLUGIN_SLUG) -maxdepth 3 -type f | sort
+	@find $(PLUGIN_SLUG) -maxdepth 3 -type f | sort

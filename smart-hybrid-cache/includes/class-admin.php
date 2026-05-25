@@ -90,6 +90,9 @@ $text = $result->get_error_message();
 $text = __( 'Object cache drop-in installed.', 'smart-hybrid-cache' );
 }
 break;
+case 'show_status':
+$text = __( 'Status refreshed.', 'smart-hybrid-cache' );
+break;
 case 'remove_dropin':
 $result = Smart_Hybrid_Cache_Dropin_Installer::remove( $force );
 if ( is_wp_error( $result ) ) {
@@ -186,6 +189,7 @@ $actions = array(
 'flush'          => __( 'Flush all cache', 'smart-hybrid-cache' ),
 'install_dropin' => __( 'Install object cache drop-in', 'smart-hybrid-cache' ),
 'remove_dropin'  => __( 'Remove object cache drop-in', 'smart-hybrid-cache' ),
+'show_status'    => __( 'Show current status', 'smart-hybrid-cache' ),
 );
 ?>
 <h2><?php esc_html_e( 'Admin Actions', 'smart-hybrid-cache' ); ?></h2>
