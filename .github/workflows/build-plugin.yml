@@ -50,10 +50,15 @@ jobs:
         run: make build
 
       - name: Upload installable plugin artifact
+        # Upload the plugin source directory (not the built ZIP) so the artifact
+        # ZIP downloaded from the GitHub Actions UI contains the plugin files
+        # directly at the archive root. Uploading the built ZIP would produce a
+        # nested ZIP (smart-hybrid-cache.zip inside smart-hybrid-cache.zip),
+        # which WordPress rejects with "No valid plugins were found".
         uses: actions/upload-artifact@v4
         with:
           name: smart-hybrid-cache
-          path: build/smart-hybrid-cache.zip
+          path: smart-hybrid-cache/
           if-no-files-found: error
 
       - name: Attach ZIP to GitHub release

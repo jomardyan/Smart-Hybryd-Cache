@@ -2,12 +2,14 @@
 
 ## Installing from GitHub Actions
 
-Download the `smart-hybrid-cache` workflow artifact and upload the downloaded
-`smart-hybrid-cache.zip` file in WordPress under **Plugins > Add New > Upload
-Plugin**.
+Open the workflow run on GitHub and download the `smart-hybrid-cache` artifact.
+GitHub delivers it as `smart-hybrid-cache.zip`. Upload that file as-is in
+WordPress under **Plugins > Add New > Upload Plugin** — do not extract it
+first, and do not upload any ZIP nested inside another ZIP.
 
-Do not upload a ZIP that contains another ZIP file. WordPress must see the
-`smart-hybrid-cache.php` plugin file directly inside the uploaded package.
+The artifact ZIP contains the plugin files (`smart-hybrid-cache.php`,
+`includes/`, `assets/`, `readme.txt`, …) directly at its root, so WordPress
+installs it as the `smart-hybrid-cache` plugin.
 
 ## Building locally
 
