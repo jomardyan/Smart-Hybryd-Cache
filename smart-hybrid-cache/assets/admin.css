@@ -1,0 +1,23 @@
+.smart-hybrid-cache .shc-actions {
+display: grid;
+gap: 12px;
+max-width: 760px;
+}
+.smart-hybrid-cache .shc-actions form {
+align-items: center;
+background: #fff;
+border: 1px solid #dcdcde;
+display: flex;
+gap: 12px;
+padding: 12px;
+}
+.smart-hybrid-cache .shc-status th {
+width: 280px;
+}
+.smart-hybrid-cache pre {
+background: #fff;
+border: 1px solid #dcdcde;
+max-height: 360px;
+overflow: auto;
+padding: 12px;
+}
