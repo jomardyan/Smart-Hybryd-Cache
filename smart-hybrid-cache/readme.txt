@@ -20,7 +20,7 @@ Features:
 
 * Redis, Memcached, Auto, and Disabled engine modes.
 * Safe fallback to default WordPress object cache behavior when services or extensions are unavailable.
-* Admin connection tests, flush button, status panel, and extension notices.
+* Tabbed admin settings with connection tests, flush button, monitoring cards, event logging, and extension notices.
 * Safe drop-in installation that does not overwrite another object-cache.php unless confirmed.
 * Conservative invalidation hooks for posts, terms, comments, theme switches, and plugin updates.
 * WP-CLI commands for status, test, flush, enable, disable, install-dropin, and remove-dropin.
@@ -67,7 +67,7 @@ Open Settings > Smart Hybrid Cache, remove the object cache drop-in if desired, 
 
 == Screenshots ==
 
-1. Settings page with Redis, Memcached, cache behavior, action buttons, and status panel.
+1. Tabbed settings page with Redis, Memcached, cache behavior, action buttons, and monitoring panel.
 2. Extension notices and connection status details.
 
 == Changelog ==

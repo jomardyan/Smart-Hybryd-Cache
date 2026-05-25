@@ -23,6 +23,7 @@ define( 'SMART_HYBRID_CACHE_OPTION', 'smart_hybrid_cache_options' );
 define( 'SMART_HYBRID_CACHE_SIGNATURE', 'Smart Hybrid Cache Drop-In' );
 
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-settings.php';
+require_once SMART_HYBRID_CACHE_PATH . 'includes/class-logger.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-redis-client.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-memcached-client.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-dropin-installer.php';

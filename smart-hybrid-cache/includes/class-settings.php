@@ -32,6 +32,8 @@ $defaults = array(
 'flush_on_plugin_update'    => true,
 'cleanup_dropin_uninstall'  => true,
 'cleanup_dropin_deactivate' => false,
+'enable_logging'            => true,
+'log_events'                => array(),
 'last_error'                => '',
 'last_connected_engine'     => '',
 );
@@ -88,6 +90,8 @@ $output['flush_on_theme_switch']     = self::sanitize_bool( $input['flush_on_the
 $output['flush_on_plugin_update']    = self::sanitize_bool( $input['flush_on_plugin_update'] ?? false );
 $output['cleanup_dropin_uninstall']  = self::sanitize_bool( $input['cleanup_dropin_uninstall'] ?? false );
 $output['cleanup_dropin_deactivate'] = self::sanitize_bool( $input['cleanup_dropin_deactivate'] ?? false );
+$output['enable_logging']            = self::sanitize_bool( $input['enable_logging'] ?? false );
+$output['log_events']                = self::sanitize_log_events( $current['log_events'] ?? array() );
 $output['last_error']                = sanitize_text_field( (string) ( $input['last_error'] ?? $current['last_error'] ) );
 $output['last_connected_engine']     = sanitize_key( (string) ( $input['last_connected_engine'] ?? $current['last_connected_engine'] ) );
 
@@ -109,6 +113,38 @@ if ( '' === $prefix ) {
 $prefix = self::defaults()['key_prefix'];
 }
 return substr( $prefix, 0, 64 );
+}
+
+private static function sanitize_log_events( mixed $events ): array {
+$clean = array();
+if ( ! is_array( $events ) ) {
+return $clean;
+}
+foreach ( array_slice( $events, -50 ) as $event ) {
+if ( ! is_array( $event ) ) {
+continue;
+}
+$clean[] = array(
+'time'    => sanitize_text_field( (string) ( $event['time'] ?? '' ) ),
+'event'   => sanitize_key( (string) ( $event['event'] ?? '' ) ),
+'message' => sanitize_text_field( (string) ( $event['message'] ?? '' ) ),
+'context' => self::sanitize_log_context( $event['context'] ?? array() ),
+);
+}
+return $clean;
+}
+
+private static function sanitize_log_context( mixed $context ): array {
+$clean = array();
+if ( ! is_array( $context ) ) {
+return $clean;
+}
+foreach ( $context as $key => $value ) {
+if ( is_scalar( $value ) || null === $value ) {
+$clean[ sanitize_key( (string) $key ) ] = sanitize_text_field( (string) $value );
+}
+}
+return $clean;
 }
 
 public static function register(): void {

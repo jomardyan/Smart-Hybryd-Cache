@@ -67,10 +67,21 @@ return false;
 }
 
 private function save_connection_state( string $engine, string $error ): void {
-$options                          = Smart_Hybrid_Cache_Settings::get_options();
+$options = Smart_Hybrid_Cache_Settings::get_options();
+$changed = $engine !== (string) $options['last_connected_engine'] || $error !== (string) $options['last_error'];
 $options['last_connected_engine'] = $engine;
 $options['last_error']            = $error;
 update_option( SMART_HYBRID_CACHE_OPTION, $options, false );
+if ( $changed ) {
+Smart_Hybrid_Cache_Logger::log(
+'' !== $engine ? 'connection_success' : 'connection_failure',
+'' !== $engine ? __( 'Cache engine connected.', 'smart-hybrid-cache' ) : __( 'Cache engine connection failed.', 'smart-hybrid-cache' ),
+array(
+'engine' => $engine ?: 'none',
+'error'  => $error,
+)
+);
+}
 }
 
 public function get_active_engine(): string {
@@ -84,10 +95,16 @@ return $this->options;
 public function test( string $engine ): array {
 $client = 'redis' === $engine ? new Smart_Hybrid_Cache_Redis_Client() : new Smart_Hybrid_Cache_Memcached_Client();
 $ok     = $client->connect( $this->options ) && $client->ping();
+$message = $ok ? __( 'Connection successful.', 'smart-hybrid-cache' ) : $client->get_last_error();
+Smart_Hybrid_Cache_Logger::log(
+$ok ? 'connection_test_success' : 'connection_test_failure',
+$message,
+array( 'engine' => $engine )
+);
 return array(
 'ok'      => $ok,
 'engine'  => $engine,
-'message' => $ok ? __( 'Connection successful.', 'smart-hybrid-cache' ) : $client->get_last_error(),
+'message' => $message,
 );
 }
 
@@ -121,6 +138,11 @@ $result = $this->redis->flush_prefix( $this->options['key_prefix'] );
 $result = $this->memcached->flush();
 }
 do_action( 'smart_hybrid_cache_after_flush', $this->active_engine, $result );
+Smart_Hybrid_Cache_Logger::log(
+$result ? 'flush_success' : 'flush_failure',
+$result ? __( 'Cache flushed.', 'smart-hybrid-cache' ) : __( 'Cache flush could not be completed.', 'smart-hybrid-cache' ),
+array( 'engine' => $this->active_engine )
+);
 return $result;
 }
 
