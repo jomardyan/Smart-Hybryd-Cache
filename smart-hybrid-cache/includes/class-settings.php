@@ -68,7 +68,8 @@ public static function sanitize( array $input ): array {
 $current = self::get_options();
 $output  = array();
 
-$output['engine']                    = in_array( $input['engine'] ?? $current['engine'], self::ENGINES, true ) ? $input['engine'] : 'auto';
+$engine = sanitize_key( (string) ( $input['engine'] ?? $current['engine'] ) );
+		$output['engine']                    = in_array( $engine, self::ENGINES, true ) ? $engine : 'auto';
 $output['redis_host']                = sanitize_text_field( (string) ( $input['redis_host'] ?? $current['redis_host'] ) );
 $output['redis_port']                = self::sanitize_port( $input['redis_port'] ?? $current['redis_port'], 6379 );
 $output['redis_password']            = isset( $input['redis_password'] ) ? sanitize_text_field( wp_unslash( (string) $input['redis_password'] ) ) : (string) $current['redis_password'];

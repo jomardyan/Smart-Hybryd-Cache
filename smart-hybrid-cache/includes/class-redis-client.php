@@ -29,6 +29,7 @@ $host    = $scheme . (string) $options['redis_host'];
 $port    = (int) $options['redis_port'];
 $timeout = (float) $options['redis_timeout'];
 $args    = apply_filters( 'smart_hybrid_cache_connection_args', array( $host, $port, $timeout ), 'redis', $options );
+			$args    = is_array( $args ) && count( $args ) >= 3 ? array_values( $args ) : array( $host, $port, $timeout );
 $method  = ! empty( $options['redis_persistent'] ) && method_exists( $redis, 'pconnect' ) ? 'pconnect' : 'connect';
 
 if ( ! $redis->{$method}( ...$args ) ) {

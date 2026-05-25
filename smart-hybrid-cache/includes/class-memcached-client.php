@@ -27,8 +27,14 @@ $persistent_id = ! empty( $options['memcached_persistent'] ) ? 'smart_hybrid_cac
 $memcached     = '' !== $persistent_id ? new Memcached( $persistent_id ) : new Memcached();
 $servers       = $memcached->getServerList();
 if ( empty( $servers ) ) {
-$args = apply_filters( 'smart_hybrid_cache_connection_args', array( (string) $options['memcached_host'], (int) $options['memcached_port'] ), 'memcached', $options );
-$memcached->addServer( ...$args );
+$host = (string) $options['memcached_host'];
+				$port = (int) $options['memcached_port'];
+				$args = apply_filters( 'smart_hybrid_cache_connection_args', array( $host, $port ), 'memcached', $options );
+				$args = is_array( $args ) && count( $args ) >= 2 ? array_values( $args ) : array( $host, $port );
+				if ( ! $memcached->addServer( ...$args ) ) {
+					$this->last_error = __( 'Unable to add Memcached server.', 'smart-hybrid-cache' );
+					return false;
+				}
 }
 
 $version = $memcached->getVersion();

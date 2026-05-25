@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 exit;
 }
 
-if ( ! defined( 'SMART_HYBRID_CACHE_D drop' ) ) {
+if ( ! defined( 'SMART_HYBRID_CACHE_DROPIN_VERSION' ) ) {
 define( 'SMART_HYBRID_CACHE_DROPIN_VERSION', '1.0.0' );
 }
 
@@ -135,6 +135,7 @@ return $this->set( $key, $data, $group, $expire, 'add' );
 public function set( string $key, mixed $data, string $group = 'default', int $expire = 0, string $mode = 'set' ): bool {
 $group = $this->sanitize_group( $group );
 $key   = (string) $key;
+$this->ensure_group( $group );
 $this->cache[ $group ][ $key ] = $data;
 if ( $this->is_non_persistent_group( $group ) || 'none' === $this->engine ) {
 return true;
@@ -197,6 +198,7 @@ $hit = false;
 }
 if ( $hit ) {
 $data = $this->unpack( $value );
+$this->ensure_group( $group );
 $this->cache[ $group ][ $key ] = $data;
 ++$this->cache_hits;
 $found = true;
@@ -213,7 +215,9 @@ return false;
 public function delete( string $key, string $group = 'default', bool $deprecated = false ): bool {
 $group = $this->sanitize_group( $group );
 $key   = (string) $key;
-unset( $this->cache[ $group ][ $key ] );
+if ( isset( $this->cache[ $group ] ) ) {
+				unset( $this->cache[ $group ][ $key ] );
+			}
 if ( $this->is_non_persistent_group( $group ) || 'none' === $this->engine ) {
 return true;
 }
@@ -279,8 +283,9 @@ return $result;
 }
 
 public function switch_to_blog( int $blog_id ): void {
-$this->blog_id = $blog_id;
-}
+			$this->blog_id = $blog_id;
+			$this->cache   = array();
+		}
 
 public function add_global_groups( array|string $groups ): void {
 foreach ( (array) $groups as $group ) {
@@ -300,7 +305,13 @@ public function stats(): void {
 echo htmlspecialchars( 'Smart Hybrid Cache hits: ' . $this->cache_hits . ', misses: ' . $this->cache_misses . ', engine: ' . $this->engine, ENT_QUOTES, 'UTF-8' );
 }
 
-private function persistent_key( string $key, string $group ): string {
+private function ensure_group( string $group ): void {
+			if ( ! isset( $this->cache[ $group ] ) || ! is_array( $this->cache[ $group ] ) ) {
+				$this->cache[ $group ] = array();
+			}
+		}
+
+		private function persistent_key( string $key, string $group ): string {
 $prefix = preg_replace( '/[^A-Za-z0-9_:-]/', '_', (string) $this->options['key_prefix'] );
 $scope  = in_array( $group, $this->global_groups, true ) ? 'global' : 'blog_' . $this->blog_id;
 if ( function_exists( 'is_multisite' ) && is_multisite() && defined( 'COOKIEHASH' ) ) {
@@ -373,5 +384,6 @@ function wp_cache_add_global_groups( $groups ) { $GLOBALS['wp_object_cache']->ad
 function wp_cache_add_non_persistent_groups( $groups ) { $GLOBALS['wp_object_cache']->add_non_persistent_groups( $groups ); }
 function wp_cache_switch_to_blog( $blog_id ) { $GLOBALS['wp_object_cache']->switch_to_blog( (int) $blog_id ); }
 function wp_cache_close() { return true; }
+function wp_cache_stats() { $GLOBALS['wp_object_cache']->stats(); }
 function wp_cache_flush_runtime() { $GLOBALS['wp_object_cache'] = new WP_Object_Cache(); return true; }
 function wp_cache_supports( $feature ) { return in_array( $feature, array( 'add_multiple', 'set_multiple', 'get_multiple', 'delete_multiple', 'flush_runtime' ), true ); }
