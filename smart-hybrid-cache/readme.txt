@@ -4,7 +4,7 @@ Tags: cache, object cache, redis, memcached, performance
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -23,7 +23,9 @@ Features:
 * Tabbed admin settings with connection tests, flush button, monitoring cards, event logging, and extension notices.
 * Safe drop-in installation that does not overwrite another object-cache.php unless confirmed.
 * Conservative invalidation hooks for posts, terms, comments, theme switches, and plugin updates.
-* WP-CLI commands for status, test, flush, enable, disable, install-dropin, and remove-dropin.
+* WP-CLI commands for status, test, flush, enable, disable, install-dropin, remove-dropin, and diagnostics.
+* WordPress Site Health integration with debug information.
+* Configurable non-persistent groups and additional global groups.
 * Multisite-aware cache key prefixing.
 
 Redis passwords are saved in the WordPress options table with autoload disabled. Protect database access and prefer network-level controls where possible.
@@ -72,10 +74,21 @@ Open Settings > Smart Hybrid Cache, remove the object cache drop-in if desired, 
 
 == Changelog ==
 
+= 1.1.0 =
+* Release packages can be versioned from CI release tags or manual workflow input.
+* Improved object-cache.php detection with clear messages when persistent cache is already available through Smart Hybrid Cache or another plugin.
+* Refreshed admin dashboard overview, action cards, and monitoring styles.
+* Configurable non-persistent and additional global cache groups (Redis Object Cache parity).
+* WordPress Site Health test and Site Health debug information surface plugin status.
+* Diagnostics export available from the admin Actions tab and via `wp smart-cache diagnostics`.
+
 = 1.0.0 =
 * Initial release with Redis and Memcached persistent object cache support.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Release package metadata, cache availability notices, and the admin experience were improved.
 
 = 1.0.0 =
 Initial release. Ensure Redis or Memcached and the matching PHP extension are available before enabling persistent object caching.

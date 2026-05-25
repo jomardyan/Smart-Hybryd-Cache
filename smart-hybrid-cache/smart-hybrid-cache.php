@@ -3,7 +3,7 @@
  * Plugin Name: Smart Hybrid Cache
  * Plugin URI: https://github.com/jomardyan/Smart-Hybryd-Cache
  * Description: Persistent WordPress object caching with Redis or Memcached, safe fallbacks, admin controls, and WP-CLI support.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Author: Smart Hybrid Cache Contributors
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SMART_HYBRID_CACHE_VERSION', '1.0.0' );
+define( 'SMART_HYBRID_CACHE_VERSION', '1.1.0' );
 define( 'SMART_HYBRID_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SMART_HYBRID_CACHE_URL', plugin_dir_url( __FILE__ ) );
 define( 'SMART_HYBRID_CACHE_BASENAME', plugin_basename( __FILE__ ) );
@@ -29,6 +29,8 @@ require_once SMART_HYBRID_CACHE_PATH . 'includes/class-memcached-client.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-dropin-installer.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-cache-manager.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-health-check.php';
+require_once SMART_HYBRID_CACHE_PATH . 'includes/class-diagnostics.php';
+require_once SMART_HYBRID_CACHE_PATH . 'includes/class-site-health.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-admin.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-cli.php';
 require_once SMART_HYBRID_CACHE_PATH . 'includes/class-plugin.php';

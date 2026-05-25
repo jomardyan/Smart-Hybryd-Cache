@@ -33,6 +33,8 @@ $defaults = array(
 'cleanup_dropin_uninstall'  => true,
 'cleanup_dropin_deactivate' => false,
 'enable_logging'            => true,
+'non_persistent_groups'     => '',
+'additional_global_groups'  => '',
 'log_events'                => array(),
 'last_error'                => '',
 'last_connected_engine'     => '',
@@ -91,6 +93,8 @@ $output['flush_on_plugin_update']    = self::sanitize_bool( $input['flush_on_plu
 $output['cleanup_dropin_uninstall']  = self::sanitize_bool( $input['cleanup_dropin_uninstall'] ?? false );
 $output['cleanup_dropin_deactivate'] = self::sanitize_bool( $input['cleanup_dropin_deactivate'] ?? false );
 $output['enable_logging']            = self::sanitize_bool( $input['enable_logging'] ?? false );
+$output['non_persistent_groups']     = self::sanitize_group_list( $input['non_persistent_groups'] ?? $current['non_persistent_groups'] );
+$output['additional_global_groups']  = self::sanitize_group_list( $input['additional_global_groups'] ?? $current['additional_global_groups'] );
 $output['log_events']                = self::sanitize_log_events( $current['log_events'] ?? array() );
 $output['last_error']                = sanitize_text_field( (string) ( $input['last_error'] ?? $current['last_error'] ) );
 $output['last_connected_engine']     = sanitize_key( (string) ( $input['last_connected_engine'] ?? $current['last_connected_engine'] ) );
@@ -113,6 +117,31 @@ if ( '' === $prefix ) {
 $prefix = self::defaults()['key_prefix'];
 }
 return substr( $prefix, 0, 64 );
+}
+
+private static function sanitize_group_list( mixed $value ): string {
+if ( is_array( $value ) ) {
+$value = implode( ',', $value );
+}
+$value  = (string) $value;
+$tokens = preg_split( '/[\s,]+/', $value ) ?: array();
+$clean  = array();
+foreach ( $tokens as $token ) {
+$token = sanitize_key( str_replace( array( '-', ' ' ), '_', (string) $token ) );
+if ( '' !== $token ) {
+$clean[] = substr( $token, 0, 64 );
+}
+}
+return implode( ',', array_values( array_unique( $clean ) ) );
+}
+
+public static function group_list( string $key ): array {
+$options = self::get_options();
+$raw     = isset( $options[ $key ] ) ? (string) $options[ $key ] : '';
+if ( '' === $raw ) {
+return array();
+}
+return array_values( array_filter( array_map( 'trim', explode( ',', $raw ) ) ) );
 }
 
 private static function sanitize_log_events( mixed $events ): array {

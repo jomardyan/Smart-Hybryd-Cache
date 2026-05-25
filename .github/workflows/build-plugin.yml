@@ -3,10 +3,16 @@ name: Build Plugin ZIP
 on:
   push:
   pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Optional plugin version for the packaged ZIP'
+        required: false
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -28,6 +34,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y zip
 
+      - name: Resolve package version
+        id: package-version
+        shell: bash
+        run: |
+          version="${{ github.event.release.tag_name || inputs.version || '' }}"
+          version="${version#v}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Bump plugin metadata for release package
+        if: steps.package-version.outputs.version != ''
+        run: php tools/bump-plugin-version.php "${{ steps.package-version.outputs.version }}"
+
       - name: Build standalone plugin ZIP
         run: make build
 
@@ -35,5 +53,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: smart-hybrid-cache
-          path: smart-hybrid-cache/
+          path: build/smart-hybrid-cache.zip
           if-no-files-found: error
+
+      - name: Attach ZIP to GitHub release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" build/smart-hybrid-cache.zip --clobber
