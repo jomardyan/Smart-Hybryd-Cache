@@ -1,6 +1,68 @@
+.smart-hybrid-cache .shc-hero {
+align-items: center;
+background: linear-gradient(135deg, #0f172a, #1d4ed8);
+border-radius: 12px;
+box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+color: #fff;
+display: flex;
+justify-content: space-between;
+margin: 18px 0;
+padding: 24px;
+}
+.smart-hybrid-cache .shc-hero h1 {
+color: #fff;
+margin: 0 0 8px;
+padding: 0;
+}
+.smart-hybrid-cache .shc-hero p {
+font-size: 14px;
+margin: 0;
+max-width: 760px;
+}
+.smart-hybrid-cache .shc-version {
+background: rgba(255, 255, 255, 0.16);
+border: 1px solid rgba(255, 255, 255, 0.28);
+border-radius: 999px;
+font-weight: 600;
+padding: 6px 12px;
+}
+.smart-hybrid-cache .shc-overview,
 .smart-hybrid-cache .shc-actions {
 display: grid;
 gap: 12px;
+}
+.smart-hybrid-cache .shc-overview {
+grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+margin: 16px 0 22px;
+}
+.smart-hybrid-cache .shc-overview-card {
+background: #fff;
+border: 1px solid #dcdcde;
+border-left: 4px solid #8c8f94;
+border-radius: 8px;
+box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+padding: 16px;
+}
+.smart-hybrid-cache .shc-overview-card span,
+.smart-hybrid-cache .shc-action-copy span {
+color: #646970;
+display: block;
+}
+.smart-hybrid-cache .shc-overview-card strong {
+display: block;
+font-size: 20px;
+margin-top: 6px;
+}
+.smart-hybrid-cache .shc-state-good {
+border-left-color: #00a32a;
+}
+.smart-hybrid-cache .shc-state-warn {
+border-left-color: #dba617;
+}
+.smart-hybrid-cache .shc-state-muted {
+border-left-color: #8c8f94;
+}
+.smart-hybrid-cache .shc-actions {
 max-width: 760px;
 }
 .smart-hybrid-cache .shc-tabs {
@@ -12,7 +74,7 @@ cursor: pointer;
 .smart-hybrid-cache .shc-tab-panel {
 background: #fff;
 border: 1px solid #dcdcde;
-border-top: 0;
+border-radius: 0 0 8px 8px;
 margin-bottom: 20px;
 padding: 20px;
 }
@@ -20,9 +82,18 @@ padding: 20px;
 align-items: center;
 background: #fff;
 border: 1px solid #dcdcde;
+border-radius: 8px;
 display: flex;
 gap: 12px;
+justify-content: space-between;
 padding: 12px;
+}
+.smart-hybrid-cache .shc-action-copy {
+flex: 1;
+}
+.smart-hybrid-cache .shc-action-copy strong {
+display: block;
+margin-bottom: 4px;
 }
 .smart-hybrid-cache .shc-status th {
 width: 280px;

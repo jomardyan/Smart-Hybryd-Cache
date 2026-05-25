@@ -137,8 +137,16 @@ $options = Smart_Hybrid_Cache_Settings::get_options();
 $status  = Smart_Hybrid_Cache_Health_Check::get_status( $this->manager );
 ?>
 <div class="wrap smart-hybrid-cache">
+<div class="shc-hero">
+<div>
 <h1><?php esc_html_e( 'Smart Hybrid Cache', 'smart-hybrid-cache' ); ?></h1>
+<p><?php esc_html_e( 'Hybrid Redis and Memcached object caching with safe drop-in management, health checks, and admin controls.', 'smart-hybrid-cache' ); ?></p>
+</div>
+<span class="shc-version"><?php echo esc_html( SMART_HYBRID_CACHE_VERSION ); ?></span>
+</div>
 <?php $this->render_redirect_notice(); ?>
+<?php $this->render_cache_availability_notice( $status ); ?>
+<?php $this->render_overview( $status ); ?>
 <?php $this->render_tabs(); ?>
 <form method="post" action="options.php">
 <?php settings_fields( 'smart_hybrid_cache' ); ?>
@@ -226,27 +234,72 @@ $type = isset( $_GET['shc_type'] ) && 'error' === $_GET['shc_type'] ? 'notice-er
 printf( '<div class="notice %1$s is-dismissible"><p>%2$s</p></div>', esc_attr( $type ), esc_html( sanitize_text_field( wp_unslash( $_GET['shc_notice'] ) ) ) );
 }
 
+private function render_cache_availability_notice( array $status ): void {
+$dropin = $status['dropin'];
+$class  = ! empty( $dropin['available'] ) ? 'notice-info' : 'notice-warning';
+printf( '<div class="notice %1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $dropin['message'] ) );
+}
+
+private function render_overview( array $status ): void {
+$cards = array(
+array(
+'label' => __( 'Object cache', 'smart-hybrid-cache' ),
+'value' => ! empty( $status['object_cache_available'] ) ? __( 'Available', 'smart-hybrid-cache' ) : __( 'Not active', 'smart-hybrid-cache' ),
+'state' => ! empty( $status['object_cache_available'] ) ? 'good' : 'warn',
+),
+array(
+'label' => __( 'Active engine', 'smart-hybrid-cache' ),
+'value' => 'none' !== $status['active_engine'] ? ucfirst( $status['active_engine'] ) : __( 'None', 'smart-hybrid-cache' ),
+'state' => 'none' !== $status['active_engine'] ? 'good' : 'muted',
+),
+array(
+'label' => __( 'Redis extension', 'smart-hybrid-cache' ),
+'value' => $status['redis_available'] ? __( 'Available', 'smart-hybrid-cache' ) : __( 'Missing', 'smart-hybrid-cache' ),
+'state' => $status['redis_available'] ? 'good' : 'muted',
+),
+array(
+'label' => __( 'Memcached extension', 'smart-hybrid-cache' ),
+'value' => $status['memcached_available'] ? __( 'Available', 'smart-hybrid-cache' ) : __( 'Missing', 'smart-hybrid-cache' ),
+'state' => $status['memcached_available'] ? 'good' : 'muted',
+),
+);
+?>
+<div class="shc-overview" aria-label="<?php esc_attr_e( 'Smart Hybrid Cache overview', 'smart-hybrid-cache' ); ?>">
+<?php foreach ( $cards as $card ) : ?>
+<div class="shc-overview-card shc-state-<?php echo esc_attr( $card['state'] ); ?>">
+<span><?php echo esc_html( $card['label'] ); ?></span>
+<strong><?php echo esc_html( $card['value'] ); ?></strong>
+</div>
+<?php endforeach; ?>
+</div>
+<?php
+}
+
 private function render_actions(): void {
 $actions = array(
-'test_redis'     => __( 'Test Redis connection', 'smart-hybrid-cache' ),
-'test_memcached' => __( 'Test Memcached connection', 'smart-hybrid-cache' ),
-'flush'          => __( 'Flush all cache', 'smart-hybrid-cache' ),
-'install_dropin' => __( 'Install object cache drop-in', 'smart-hybrid-cache' ),
-'remove_dropin'  => __( 'Remove object cache drop-in', 'smart-hybrid-cache' ),
-'show_status'    => __( 'Show current status', 'smart-hybrid-cache' ),
+'test_redis'     => array( __( 'Test Redis connection', 'smart-hybrid-cache' ), __( 'Verify Redis settings without changing the active cache.', 'smart-hybrid-cache' ) ),
+'test_memcached' => array( __( 'Test Memcached connection', 'smart-hybrid-cache' ), __( 'Verify Memcached settings without changing the active cache.', 'smart-hybrid-cache' ) ),
+'flush'          => array( __( 'Flush all cache', 'smart-hybrid-cache' ), __( 'Clear keys managed by the active engine.', 'smart-hybrid-cache' ) ),
+'install_dropin' => array( __( 'Install object cache drop-in', 'smart-hybrid-cache' ), __( 'Enable persistent object caching when no other drop-in owns object-cache.php.', 'smart-hybrid-cache' ) ),
+'remove_dropin'  => array( __( 'Remove object cache drop-in', 'smart-hybrid-cache' ), __( 'Remove only the drop-in created by Smart Hybrid Cache unless replacement is confirmed.', 'smart-hybrid-cache' ) ),
+'show_status'    => array( __( 'Show current status', 'smart-hybrid-cache' ), __( 'Refresh dashboard status and recent events.', 'smart-hybrid-cache' ) ),
 );
 ?>
 <h2><?php esc_html_e( 'Admin Actions', 'smart-hybrid-cache' ); ?></h2>
 <div class="shc-actions">
-<?php foreach ( $actions as $action => $label ) : ?>
+<?php foreach ( $actions as $action => $details ) : ?>
 <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+<div class="shc-action-copy">
+<strong><?php echo esc_html( $details[0] ); ?></strong>
+<span><?php echo esc_html( $details[1] ); ?></span>
+</div>
 <?php wp_nonce_field( 'smart_hybrid_cache_action' ); ?>
 <input type="hidden" name="action" value="smart_hybrid_cache_action" />
 <input type="hidden" name="shc_action" value="<?php echo esc_attr( $action ); ?>" />
 <?php if ( in_array( $action, array( 'install_dropin', 'remove_dropin' ), true ) ) : ?>
 <label><input type="checkbox" name="force_replace" value="1" /> <?php esc_html_e( 'Confirm replacement/removal of a non-plugin drop-in', 'smart-hybrid-cache' ); ?></label>
 <?php endif; ?>
-<?php submit_button( $label, 'secondary', 'submit', false ); ?>
+<?php submit_button( $details[0], 'secondary', 'submit', false ); ?>
 </form>
 <?php endforeach; ?>
 </div>
@@ -261,6 +314,7 @@ __( 'Active engine', 'smart-hybrid-cache' )                   => $status['active
 __( 'PHP Redis extension availability', 'smart-hybrid-cache' ) => $status['redis_available'] ? __( 'Available', 'smart-hybrid-cache' ) : __( 'Missing', 'smart-hybrid-cache' ),
 __( 'PHP Memcached extension availability', 'smart-hybrid-cache' ) => $status['memcached_available'] ? __( 'Available', 'smart-hybrid-cache' ) : __( 'Missing', 'smart-hybrid-cache' ),
 __( 'Drop-in status', 'smart-hybrid-cache' )                  => $status['dropin']['exists'] ? __( 'Installed', 'smart-hybrid-cache' ) : __( 'Not installed', 'smart-hybrid-cache' ),
+__( 'Object cache availability', 'smart-hybrid-cache' )       => ! empty( $status['object_cache_available'] ) ? __( 'Available', 'smart-hybrid-cache' ) : __( 'Not active', 'smart-hybrid-cache' ),
 __( 'Connection status', 'smart-hybrid-cache' )                => $status['connection_status'],
 __( 'Last connection error', 'smart-hybrid-cache' )            => $status['last_error'] ?: __( 'None', 'smart-hybrid-cache' ),
 __( 'Cache prefix', 'smart-hybrid-cache' )                    => $status['cache_prefix'],

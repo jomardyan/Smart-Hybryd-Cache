@@ -4,7 +4,7 @@ Tags: cache, object cache, redis, memcached, performance
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -72,10 +72,18 @@ Open Settings > Smart Hybrid Cache, remove the object cache drop-in if desired, 
 
 == Changelog ==
 
+= 1.1.0 =
+* Release packages can be versioned from CI release tags or manual workflow input.
+* Improved object-cache.php detection with clear messages when persistent cache is already available through Smart Hybrid Cache or another plugin.
+* Refreshed admin dashboard overview, action cards, and monitoring styles.
+
 = 1.0.0 =
 * Initial release with Redis and Memcached persistent object cache support.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Release package metadata, cache availability notices, and the admin experience were improved.
 
 = 1.0.0 =
 Initial release. Ensure Redis or Memcached and the matching PHP extension are available before enabling persistent object caching.

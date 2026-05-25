@@ -22,6 +22,7 @@ return array(
 'redis_available'       => $redis->is_available(),
 'memcached_available'   => $mem->is_available(),
 'dropin'                => $dropin,
+'object_cache_available' => ! empty( $dropin['available'] ),
 'connection_status'     => 'none' !== $manager->get_active_engine() ? __( 'Connected', 'smart-hybrid-cache' ) : __( 'Not connected', 'smart-hybrid-cache' ),
 'last_error'            => $options['last_error'],
 'cache_prefix'          => $options['key_prefix'],

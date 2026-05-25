@@ -20,14 +20,31 @@ public static function status(): array {
 $target = self::target();
 $exists = file_exists( $target );
 $owned  = $exists && self::is_owned();
+$active = function_exists( 'wp_using_ext_object_cache' ) && wp_using_ext_object_cache();
+$available = $exists || $active;
+$owner_label = __( 'Not installed.', 'smart-hybrid-cache' );
+$availability_message = __( 'Persistent object cache is not enabled yet. Install the Smart Hybrid Cache drop-in to activate it.', 'smart-hybrid-cache' );
+
+if ( $owned ) {
+$owner_label = __( 'Created by Smart Hybrid Cache.', 'smart-hybrid-cache' );
+$availability_message = __( 'Persistent object cache is already available through Smart Hybrid Cache.', 'smart-hybrid-cache' );
+} elseif ( $exists ) {
+$owner_label = __( 'Created by another plugin or manually.', 'smart-hybrid-cache' );
+$availability_message = __( 'Persistent object cache is already available in the system through another plugin or a manual object-cache.php drop-in. Smart Hybrid Cache will not replace it unless you explicitly confirm replacement.', 'smart-hybrid-cache' );
+} elseif ( $active ) {
+$availability_message = __( 'WordPress reports that an external object cache is already active in this request.', 'smart-hybrid-cache' );
+}
 
 return array(
 'exists'      => $exists,
 'owned'       => $owned,
+'active'      => $active,
+'available'   => $available,
 'writable'    => ( ! $exists && is_writable( WP_CONTENT_DIR ) ) || ( $exists && is_writable( $target ) ),
 'path'        => $target,
 'advanced'    => file_exists( trailingslashit( WP_CONTENT_DIR ) . 'advanced-cache.php' ),
-'owner_label' => $exists ? ( $owned ? __( 'Created by Smart Hybrid Cache.', 'smart-hybrid-cache' ) : __( 'Created by another plugin or manually.', 'smart-hybrid-cache' ) ) : __( 'Not installed.', 'smart-hybrid-cache' ),
+'owner_label' => $owner_label,
+'message'     => $availability_message,
 );
 }
 
@@ -51,8 +68,11 @@ $target = self::target();
 if ( ! file_exists( $source ) || ! is_readable( $source ) ) {
 return new WP_Error( 'missing_source', __( 'Drop-in source file is missing.', 'smart-hybrid-cache' ) );
 }
+if ( file_exists( $target ) && self::is_owned() && ! $force ) {
+return new WP_Error( 'dropin_already_installed', __( 'Smart Hybrid Cache object-cache.php is already installed and available.', 'smart-hybrid-cache' ) );
+}
 if ( file_exists( $target ) && ! self::is_owned() && ! $force ) {
-return new WP_Error( 'existing_dropin', __( 'An object-cache.php file already exists. Confirm replacement before installing.', 'smart-hybrid-cache' ) );
+return new WP_Error( 'existing_dropin', __( 'Persistent object cache is already available through another plugin or a manual object-cache.php file. Confirm replacement before installing Smart Hybrid Cache.', 'smart-hybrid-cache' ) );
 }
 if ( ! is_writable( WP_CONTENT_DIR ) && ( ! file_exists( $target ) || ! is_writable( $target ) ) ) {
 return new WP_Error( 'not_writable', __( 'wp-content is not writable.', 'smart-hybrid-cache' ) );
