@@ -46,12 +46,20 @@ if ( ! current_user_can( 'manage_options' ) ) {
 return;
 }
 $options = Smart_Hybrid_Cache_Settings::get_options();
+$engine  = $options['engine'];
+if ( empty( $options['enable_dropin'] ) || 'disabled' === $engine ) {
+return;
+}
 $redis   = class_exists( 'Redis' );
 $mem     = class_exists( 'Memcached' );
-if ( in_array( $options['engine'], array( 'redis', 'auto' ), true ) && ! $redis ) {
+if ( 'auto' === $engine && ! $redis && ! $mem ) {
+printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_html__( 'Smart Hybrid Cache: No supported PHP cache extension is available. Install Redis or Memcached before enabling the object cache drop-in.', 'smart-hybrid-cache' ) );
+return;
+}
+if ( 'redis' === $engine && ! $redis ) {
 printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_html__( 'Smart Hybrid Cache: Redis PHP extension is not available.', 'smart-hybrid-cache' ) );
 }
-if ( in_array( $options['engine'], array( 'memcached', 'auto' ), true ) && ! $mem ) {
+if ( 'memcached' === $engine && ! $mem ) {
 printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_html__( 'Smart Hybrid Cache: Memcached PHP extension is not available.', 'smart-hybrid-cache' ) );
 }
 }
