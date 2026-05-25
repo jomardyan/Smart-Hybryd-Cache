@@ -32,9 +32,21 @@ return self::$manager;
 }
 
 public static function settings_updated( mixed $old_value, mixed $value, string $option ): void {
+if ( Smart_Hybrid_Cache_Logger::is_writing() ) {
+return;
+}
 if ( is_array( $value ) && ! empty( $value['enable_dropin'] ) ) {
 	Smart_Hybrid_Cache_Dropin_Installer::install( false );
 }
+if ( ! is_array( $old_value ) || ! is_array( $value ) ) {
+return;
+}
+unset( $old_value['last_error'], $old_value['last_connected_engine'], $old_value['log_events'] );
+unset( $value['last_error'], $value['last_connected_engine'], $value['log_events'] );
+if ( $old_value === $value ) {
+return;
+}
+Smart_Hybrid_Cache_Logger::log( 'settings_updated', __( 'Settings updated.', 'smart-hybrid-cache' ) );
 }
 
 public static function activate(): void {

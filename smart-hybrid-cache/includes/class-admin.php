@@ -46,12 +46,20 @@ if ( ! current_user_can( 'manage_options' ) ) {
 return;
 }
 $options = Smart_Hybrid_Cache_Settings::get_options();
+$engine  = $options['engine'];
+if ( empty( $options['enable_dropin'] ) || 'disabled' === $engine ) {
+return;
+}
 $redis   = class_exists( 'Redis' );
 $mem     = class_exists( 'Memcached' );
-if ( in_array( $options['engine'], array( 'redis', 'auto' ), true ) && ! $redis ) {
+if ( 'auto' === $engine && ! $redis && ! $mem ) {
+printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_html__( 'Smart Hybrid Cache: No supported PHP cache extension is available. Install Redis or Memcached before enabling the object cache drop-in.', 'smart-hybrid-cache' ) );
+return;
+}
+if ( 'redis' === $engine && ! $redis ) {
 printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_html__( 'Smart Hybrid Cache: Redis PHP extension is not available.', 'smart-hybrid-cache' ) );
 }
-if ( in_array( $options['engine'], array( 'memcached', 'auto' ), true ) && ! $mem ) {
+if ( 'memcached' === $engine && ! $mem ) {
 printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_html__( 'Smart Hybrid Cache: Memcached PHP extension is not available.', 'smart-hybrid-cache' ) );
 }
 }
@@ -88,6 +96,7 @@ $type = 'error';
 $text = $result->get_error_message();
 } else {
 $text = __( 'Object cache drop-in installed.', 'smart-hybrid-cache' );
+Smart_Hybrid_Cache_Logger::log( 'dropin_installed', $text );
 }
 break;
 case 'show_status':
@@ -100,6 +109,7 @@ $type = 'error';
 $text = $result->get_error_message();
 } else {
 $text = __( 'Object cache drop-in removed.', 'smart-hybrid-cache' );
+Smart_Hybrid_Cache_Logger::log( 'dropin_removed', $text );
 }
 break;
 default:
@@ -129,13 +139,17 @@ $status  = Smart_Hybrid_Cache_Health_Check::get_status( $this->manager );
 <div class="wrap smart-hybrid-cache">
 <h1><?php esc_html_e( 'Smart Hybrid Cache', 'smart-hybrid-cache' ); ?></h1>
 <?php $this->render_redirect_notice(); ?>
+<?php $this->render_tabs(); ?>
 <form method="post" action="options.php">
 <?php settings_fields( 'smart_hybrid_cache' ); ?>
+<div class="shc-tab-panel" id="shc-tab-general" role="tabpanel" aria-labelledby="shc-tab-button-general">
 <h2><?php esc_html_e( 'Cache Engine', 'smart-hybrid-cache' ); ?></h2>
 <table class="form-table" role="presentation"><tbody>
 <?php $this->select_row( 'engine', __( 'Cache engine', 'smart-hybrid-cache' ), array( 'auto' => 'Auto', 'redis' => 'Redis', 'memcached' => 'Memcached', 'disabled' => 'Disabled' ), $options['engine'] ); ?>
 </tbody></table>
+</div>
 
+<div class="shc-tab-panel" id="shc-tab-redis" role="tabpanel" aria-labelledby="shc-tab-button-redis" hidden>
 <h2><?php esc_html_e( 'Redis Settings', 'smart-hybrid-cache' ); ?></h2>
 <table class="form-table" role="presentation"><tbody>
 <?php $this->text_row( 'redis_host', __( 'Host', 'smart-hybrid-cache' ), $options['redis_host'] ); ?>
@@ -145,14 +159,19 @@ $status  = Smart_Hybrid_Cache_Health_Check::get_status( $this->manager );
 <?php $this->number_row( 'redis_timeout', __( 'Timeout', 'smart-hybrid-cache' ), $options['redis_timeout'], 0.1, 10, '0.1' ); ?>
 <?php $this->checkbox_row( 'redis_tls', __( 'TLS enabled', 'smart-hybrid-cache' ), $options['redis_tls'] ); ?>
 </tbody></table>
+<p class="description"><?php esc_html_e( 'Redis passwords are stored in the WordPress options table with autoload disabled. Use server-level protections for production secrets.', 'smart-hybrid-cache' ); ?></p>
+</div>
 
+<div class="shc-tab-panel" id="shc-tab-memcached" role="tabpanel" aria-labelledby="shc-tab-button-memcached" hidden>
 <h2><?php esc_html_e( 'Memcached Settings', 'smart-hybrid-cache' ); ?></h2>
 <table class="form-table" role="presentation"><tbody>
 <?php $this->text_row( 'memcached_host', __( 'Host', 'smart-hybrid-cache' ), $options['memcached_host'] ); ?>
 <?php $this->number_row( 'memcached_port', __( 'Port', 'smart-hybrid-cache' ), $options['memcached_port'], 1, 65535 ); ?>
 <?php $this->checkbox_row( 'memcached_persistent', __( 'Persistent connection enabled', 'smart-hybrid-cache' ), $options['memcached_persistent'] ); ?>
 </tbody></table>
+</div>
 
+<div class="shc-tab-panel" id="shc-tab-behavior" role="tabpanel" aria-labelledby="shc-tab-button-behavior" hidden>
 <h2><?php esc_html_e( 'Cache Behavior', 'smart-hybrid-cache' ); ?></h2>
 <table class="form-table" role="presentation"><tbody>
 <?php $this->number_row( 'default_ttl', __( 'Default TTL', 'smart-hybrid-cache' ), $options['default_ttl'], 0, YEAR_IN_SECONDS ); ?>
@@ -163,14 +182,39 @@ $status  = Smart_Hybrid_Cache_Health_Check::get_status( $this->manager );
 <?php $this->checkbox_row( 'flush_on_plugin_update', __( 'Flush cache on plugin update', 'smart-hybrid-cache' ), $options['flush_on_plugin_update'] ); ?>
 <?php $this->checkbox_row( 'cleanup_dropin_uninstall', __( 'Cleanup drop-in on uninstall', 'smart-hybrid-cache' ), $options['cleanup_dropin_uninstall'] ); ?>
 <?php $this->checkbox_row( 'cleanup_dropin_deactivate', __( 'Cleanup drop-in on deactivation', 'smart-hybrid-cache' ), $options['cleanup_dropin_deactivate'] ); ?>
+<?php $this->checkbox_row( 'enable_logging', __( 'Enable event logging', 'smart-hybrid-cache' ), $options['enable_logging'] ); ?>
 </tbody></table>
-<p class="description"><?php esc_html_e( 'Redis passwords are stored in the WordPress options table with autoload disabled. Use server-level protections for production secrets.', 'smart-hybrid-cache' ); ?></p>
+</div>
+<div class="shc-settings-submit">
 <?php submit_button( __( 'Save Settings', 'smart-hybrid-cache' ) ); ?>
+</div>
 </form>
 
+<div class="shc-tab-panel" id="shc-tab-actions" role="tabpanel" aria-labelledby="shc-tab-button-actions" hidden>
 <?php $this->render_actions(); ?>
+</div>
+<div class="shc-tab-panel" id="shc-tab-monitoring" role="tabpanel" aria-labelledby="shc-tab-button-monitoring" hidden>
 <?php $this->render_status( $status ); ?>
 </div>
+</div>
+<?php
+}
+
+private function render_tabs(): void {
+$tabs = array(
+'general'    => __( 'General', 'smart-hybrid-cache' ),
+'redis'      => __( 'Redis', 'smart-hybrid-cache' ),
+'memcached'  => __( 'Memcached', 'smart-hybrid-cache' ),
+'behavior'   => __( 'Behavior', 'smart-hybrid-cache' ),
+'actions'    => __( 'Actions', 'smart-hybrid-cache' ),
+'monitoring' => __( 'Monitoring', 'smart-hybrid-cache' ),
+);
+?>
+<nav class="nav-tab-wrapper shc-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Smart Hybrid Cache settings sections', 'smart-hybrid-cache' ); ?>">
+<?php foreach ( $tabs as $slug => $label ) : ?>
+<button type="button" id="shc-tab-button-<?php echo esc_attr( $slug ); ?>" class="nav-tab<?php echo 'general' === $slug ? ' nav-tab-active' : ''; ?>" role="tab" aria-selected="<?php echo 'general' === $slug ? 'true' : 'false'; ?>" aria-controls="shc-tab-<?php echo esc_attr( $slug ); ?>" data-shc-tab="<?php echo esc_attr( $slug ); ?>"><?php echo esc_html( $label ); ?></button>
+<?php endforeach; ?>
+</nav>
 <?php
 }
 
@@ -210,6 +254,7 @@ $actions = array(
 }
 
 private function render_status( array $status ): void {
+$monitoring = $status['monitoring'];
 $rows = array(
 __( 'Selected engine', 'smart-hybrid-cache' )                 => $status['selected_engine'],
 __( 'Active engine', 'smart-hybrid-cache' )                   => $status['active_engine'],
@@ -225,7 +270,27 @@ __( 'Multisite status', 'smart-hybrid-cache' )                => $status['multis
 __( 'advanced-cache.php detected', 'smart-hybrid-cache' )      => $status['advanced_cache_exists'] ? __( 'Yes', 'smart-hybrid-cache' ) : __( 'No', 'smart-hybrid-cache' ),
 );
 ?>
-<h2><?php esc_html_e( 'Current Status', 'smart-hybrid-cache' ); ?></h2>
+<h2><?php esc_html_e( 'Monitoring', 'smart-hybrid-cache' ); ?></h2>
+<div class="shc-monitoring-grid">
+<?php
+$cards = array(
+__( 'Connection', 'smart-hybrid-cache' ) => $monitoring['status'],
+__( 'Memory used', 'smart-hybrid-cache' ) => $monitoring['memory'],
+__( 'Uptime', 'smart-hybrid-cache' ) => $monitoring['uptime'],
+__( 'Hit rate', 'smart-hybrid-cache' ) => $monitoring['hit_rate'],
+__( 'Current keys', 'smart-hybrid-cache' ) => $monitoring['key_count'],
+__( 'Connections', 'smart-hybrid-cache' ) => $monitoring['connections'],
+);
+foreach ( $cards as $label => $value ) :
+?>
+<div class="shc-monitoring-card">
+<span><?php echo esc_html( $label ); ?></span>
+<strong><?php echo esc_html( (string) $value ); ?></strong>
+</div>
+<?php endforeach; ?>
+</div>
+
+<h3><?php esc_html_e( 'Current Status', 'smart-hybrid-cache' ); ?></h3>
 <table class="widefat striped shc-status"><tbody>
 <?php foreach ( $rows as $label => $value ) : ?>
 <tr><th scope="row"><?php echo esc_html( $label ); ?></th><td><?php echo esc_html( $value ); ?></td></tr>
@@ -234,6 +299,26 @@ __( 'advanced-cache.php detected', 'smart-hybrid-cache' )      => $status['advan
 <?php if ( ! empty( $status['stats'] ) ) : ?>
 <h3><?php esc_html_e( 'Basic Cache Statistics', 'smart-hybrid-cache' ); ?></h3>
 <pre><?php echo esc_html( wp_json_encode( $status['stats'], JSON_PRETTY_PRINT ) ); ?></pre>
+<?php endif; ?>
+<h3><?php esc_html_e( 'Recent Event Log', 'smart-hybrid-cache' ); ?></h3>
+<?php if ( empty( $status['log_events'] ) ) : ?>
+<p><?php esc_html_e( 'No cache events have been logged yet.', 'smart-hybrid-cache' ); ?></p>
+<?php else : ?>
+<table class="widefat striped shc-log"><thead><tr>
+<th scope="col"><?php esc_html_e( 'Time', 'smart-hybrid-cache' ); ?></th>
+<th scope="col"><?php esc_html_e( 'Event', 'smart-hybrid-cache' ); ?></th>
+<th scope="col"><?php esc_html_e( 'Message', 'smart-hybrid-cache' ); ?></th>
+<th scope="col"><?php esc_html_e( 'Context', 'smart-hybrid-cache' ); ?></th>
+</tr></thead><tbody>
+<?php foreach ( $status['log_events'] as $event ) : ?>
+<tr>
+<td><?php echo esc_html( (string) ( $event['time'] ?? '' ) ); ?></td>
+<td><?php echo esc_html( (string) ( $event['event'] ?? '' ) ); ?></td>
+<td><?php echo esc_html( (string) ( $event['message'] ?? '' ) ); ?></td>
+<td><?php echo esc_html( wp_json_encode( $event['context'] ?? array() ) ); ?></td>
+</tr>
+<?php endforeach; ?>
+</tbody></table>
 <?php endif; ?>
 <?php
 }

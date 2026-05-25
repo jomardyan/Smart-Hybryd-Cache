@@ -3,6 +3,19 @@ display: grid;
 gap: 12px;
 max-width: 760px;
 }
+.smart-hybrid-cache .shc-tabs {
+margin-bottom: 20px;
+}
+.smart-hybrid-cache .shc-tabs .nav-tab {
+cursor: pointer;
+}
+.smart-hybrid-cache .shc-tab-panel {
+background: #fff;
+border: 1px solid #dcdcde;
+border-top: 0;
+margin-bottom: 20px;
+padding: 20px;
+}
 .smart-hybrid-cache .shc-actions form {
 align-items: center;
 background: #fff;
@@ -13,6 +26,32 @@ padding: 12px;
 }
 .smart-hybrid-cache .shc-status th {
 width: 280px;
+}
+.smart-hybrid-cache .shc-monitoring-grid {
+display: grid;
+gap: 12px;
+grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+margin: 16px 0 24px;
+}
+.smart-hybrid-cache .shc-monitoring-card {
+background: #fff;
+border: 1px solid #dcdcde;
+padding: 16px;
+}
+.smart-hybrid-cache .shc-monitoring-card span {
+color: #646970;
+display: block;
+font-size: 12px;
+margin-bottom: 6px;
+text-transform: uppercase;
+}
+.smart-hybrid-cache .shc-monitoring-card strong {
+display: block;
+font-size: 20px;
+}
+.smart-hybrid-cache .shc-log th,
+.smart-hybrid-cache .shc-log td {
+vertical-align: top;
 }
 .smart-hybrid-cache pre {
 background: #fff;
