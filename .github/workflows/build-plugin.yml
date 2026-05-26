@@ -2,7 +2,9 @@ name: Build Plugin ZIP
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
   release:
     types: [published]
   workflow_dispatch:
@@ -49,6 +51,10 @@ jobs:
       - name: Build standalone plugin ZIP
         run: make build
 
+      - name: Build versioned plugin ZIP
+        if: steps.package-version.outputs.version != ''
+        run: make build-versioned
+
       - name: Upload installable plugin artifact
         # Upload the plugin source directory (not the built ZIP) so the artifact
         # ZIP downloaded from the GitHub Actions UI contains the plugin files
@@ -61,8 +67,12 @@ jobs:
           path: smart-hybrid-cache/
           if-no-files-found: error
 
-      - name: Attach ZIP to GitHub release
+      - name: Attach ZIPs to GitHub release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" build/smart-hybrid-cache.zip --clobber
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            build/smart-hybrid-cache.zip \
+            "build/smart-hybrid-cache-${{ steps.package-version.outputs.version }}.zip" \
+            --clobber

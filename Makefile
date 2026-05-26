@@ -9,21 +9,26 @@ VERSION ?= $(shell sed -nE "s/^ \* Version:[[:space:]]*([^[:space:]]+).*$$/\1/p"
 VERSIONED_ZIP := $(BUILD_DIR)/$(PLUGIN_SLUG)-$(VERSION).zip
 PHP_FILES := $(shell find $(PLUGIN_DIR) -name '*.php' -type f | sort)
 
-.PHONY: all check-deps lint build build-versioned release clean tree version set-version help
+.PHONY: all check-deps lint build build-versioned release clean tree version set-version help ci
 
 all: build
 
 help:
-	@echo "Available targets:"
+	@echo ""
+	@echo "Smart Hybrid Cache — Build & Release Targets"
+	@echo "============================================="
+	@echo ""
+	@echo "  make help                 Show this help"
+	@echo "  make version              Print detected plugin version"
 	@echo "  make lint                 Validate PHP syntax for plugin files"
 	@echo "  make build                Build installable ZIP at $(ZIP)"
 	@echo "  make build-versioned      Build versioned ZIP at $(VERSIONED_ZIP)"
-	@echo "  make release              Build both standard and versioned ZIPs"
-	@echo "  make version              Print detected plugin version"
 	@echo "  make set-version VERSION=x.y.z  Update plugin metadata version"
+	@echo "  make release              Build both standard and versioned ZIPs"
+	@echo "  make ci                   Run lint + build (CI pipeline target)"
 	@echo "  make clean                Remove build artifacts"
 	@echo "  make tree                 Print plugin file tree"
-	@echo "  make help                 Show this help"
+	@echo ""
 
 check-deps:
 	@command -v php >/dev/null 2>&1 || { echo "Error: php is required."; exit 1; }
@@ -49,7 +54,7 @@ set-version:
 
 build: check-deps lint
 	@mkdir -p $(BUILD_DIR)
-	@echo "Building $(ZIP)"
+	@echo "Building $(ZIP) (v$(VERSION))"
 	@zip -qr $(ZIP) $(PLUGIN_DIR) -x '*/.DS_Store'
 	@echo "Built $(ZIP)"
 
@@ -59,10 +64,14 @@ build-versioned: check-deps lint
 	@zip -qr $(VERSIONED_ZIP) $(PLUGIN_DIR) -x '*/.DS_Store'
 	@echo "Built $(VERSIONED_ZIP)"
 
-release: clean build build-versioned
-	@echo "Release artifacts ready:"
-	@echo " - $(ZIP)"
-	@echo " - $(VERSIONED_ZIP)"
+release: build build-versioned
+	@echo ""
+	@echo "Release artifacts ready (v$(VERSION)):"
+	@echo "  • $(ZIP)"
+	@echo "  • $(VERSIONED_ZIP)"
+
+ci: lint build
+	@echo "CI build complete."
 
 clean:
 	@rm -rf $(BUILD_DIR)
