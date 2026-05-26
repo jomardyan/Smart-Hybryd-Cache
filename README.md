@@ -96,18 +96,53 @@ in WordPress under **Plugins > Add New > Upload Plugin**.
 ### Available Make targets
 
 ```sh
+make help
+make version
 make lint
 make build
+make build-versioned
+make set-version VERSION=1.2.0
+make release
 make clean
 make tree
 ```
 
 ### What they do
 
+- `make help` — shows all available build and release commands
+- `make version` — prints the detected plugin version from plugin metadata
 - `make lint` — runs PHP linting on all plugin PHP files
-- `make build` — cleans, lints, and creates `build/smart-hybrid-cache.zip`
+- `make build` — creates `build/smart-hybrid-cache.zip`
+- `make build-versioned` — creates `build/smart-hybrid-cache-<version>.zip`
+- `make set-version VERSION=1.2.0` — updates plugin metadata before packaging a release
+- `make release` — creates both standard and versioned ZIP artifacts
 - `make clean` — removes the build directory
 - `make tree` — prints the plugin file tree
+
+## Release Process
+
+### Local release preparation
+
+```sh
+make set-version VERSION=1.2.0
+make release
+```
+
+This updates plugin metadata and creates both release artifacts:
+
+- `build/smart-hybrid-cache.zip`
+- `build/smart-hybrid-cache-1.2.0.zip`
+
+### GitHub release automation
+
+The intended release flow is:
+
+1. Create a Git tag such as `v1.2.0`
+2. Publish a GitHub release for that tag
+3. The GitHub Actions workflow resolves the release version from the tag
+4. The workflow bumps plugin metadata automatically
+5. The workflow builds standard and versioned ZIP artifacts
+6. The workflow uploads artifacts and attaches ZIPs to the GitHub release
 
 ## GitHub Actions
 
@@ -116,9 +151,9 @@ This repository includes a GitHub Actions workflow that:
 - checks out the repository
 - sets up PHP 8.2
 - optionally bumps plugin version metadata for release packaging
-- builds a standalone plugin ZIP
+- builds standalone release ZIPs
 - uploads the installable plugin artifact
-- attaches the ZIP to GitHub releases
+- attaches release ZIPs to GitHub releases
 
 ## WP-CLI Support
 
