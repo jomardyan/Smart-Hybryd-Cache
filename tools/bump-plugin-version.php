@@ -16,9 +16,15 @@ if ( ! preg_match( '/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/', $version ) ) {
 	exit( 1 );
 }
 
-$root        = dirname( __DIR__ );
-$plugin_file = $root . '/smart-hybrid-cache/smart-hybrid-cache.php';
-$readme_file = $root . '/smart-hybrid-cache/readme.txt';
+$root         = dirname( __DIR__ );
+$plugin_file  = $root . '/smart-hybrid-cache/smart-hybrid-cache.php';
+$readme_file  = $root . '/smart-hybrid-cache/readme.txt';
+$current      = detect_current_version( $plugin_file );
+
+if ( version_compare( normalize_version_for_compare( $version ), normalize_version_for_compare( $current ), '<' ) ) {
+	fwrite( STDERR, "Refusing to downgrade version from {$current} to {$version}.\n" );
+	exit( 1 );
+}
 
 replace_in_file(
 	$plugin_file,
@@ -28,14 +34,98 @@ replace_in_file(
 	)
 );
 
-replace_in_file(
-	$readme_file,
-	array(
-		'/^Stable tag:\s*.+$/m' => 'Stable tag: ' . $version,
-	)
-);
+update_readme_metadata( $readme_file, $version );
 
-echo "Bumped Smart Hybrid Cache metadata to {$version}\n";
+echo "Bumped Smart Hybrid Cache metadata from {$current} to {$version}\n";
+
+/**
+ * Detect the current plugin version from the main plugin file.
+ *
+ * @param string $plugin_file Absolute plugin file path.
+ * @return string
+ */
+function detect_current_version( string $plugin_file ): string {
+	$contents = file_get_contents( $plugin_file );
+	if ( false === $contents ) {
+		fwrite( STDERR, "Unable to read {$plugin_file}\n" );
+		exit( 1 );
+	}
+
+	if ( ! preg_match( '/^ \* Version:\s*(.+)$/m', $contents, $matches ) ) {
+		fwrite( STDERR, "Unable to detect current version in {$plugin_file}\n" );
+		exit( 1 );
+	}
+
+	return trim( $matches[1] );
+}
+
+/**
+ * Normalize a semantic version for version_compare().
+ *
+ * @param string $version Version string.
+ * @return string
+ */
+function normalize_version_for_compare( string $version ): string {
+	return preg_replace( '/\+.+$/', '', $version ) ?: $version;
+}
+
+/**
+ * Update WordPress readme metadata, changelog, and upgrade notice.
+ *
+ * @param string $file    Absolute readme path.
+ * @param string $version Target version.
+ */
+function update_readme_metadata( string $file, string $version ): void {
+	$contents = file_get_contents( $file );
+	if ( false === $contents ) {
+		fwrite( STDERR, "Unable to read {$file}\n" );
+		exit( 1 );
+	}
+
+	$updated = preg_replace( '/^Stable tag:\s*.+$/m', 'Stable tag: ' . $version, $contents, 1, $stable_count );
+	if ( null === $updated || 1 !== $stable_count ) {
+		fwrite( STDERR, "Unable to update Stable tag in {$file}\n" );
+		exit( 1 );
+	}
+
+	$contents = ensure_section_entry( $updated, '== Changelog ==', $version, "* Release notes pending.\n" );
+	$contents = ensure_section_entry( $contents, '== Upgrade Notice ==', $version, "Release update.\n" );
+
+	if ( false === file_put_contents( $file, $contents ) ) {
+		fwrite( STDERR, "Unable to write {$file}\n" );
+		exit( 1 );
+	}
+}
+
+/**
+ * Ensure a version entry exists directly under a WordPress readme section.
+ *
+ * @param string $contents File contents.
+ * @param string $section  Section heading.
+ * @param string $version  Target version.
+ * @param string $body     Body text for a new entry.
+ * @return string
+ */
+function ensure_section_entry( string $contents, string $section, string $version, string $body ): string {
+	$pattern = '/(' . preg_quote( $section, '/' ) . "\\R\\R)(.*?)(?=\\R== [^=]+ ==\\R|\\z)/s";
+	if ( ! preg_match( $pattern, $contents, $matches ) ) {
+		fwrite( STDERR, "Unable to find section {$section}\n" );
+		exit( 1 );
+	}
+
+	$section_header = $matches[1];
+	$section_body   = $matches[2];
+	$entry_pattern  = '/^= ' . preg_quote( $version, '/' ) . ' =$/m';
+
+	if ( preg_match( $entry_pattern, $section_body ) ) {
+		return $contents;
+	}
+
+	$new_entry        = '= ' . $version . " =\n" . rtrim( $body ) . "\n\n";
+	$replacement_body = $section_header . $new_entry . ltrim( $section_body, "\r\n" );
+
+	return preg_replace( $pattern, $replacement_body, $contents, 1 ) ?? $contents;
+}
 
 /**
  * Replace expected patterns in a file.
