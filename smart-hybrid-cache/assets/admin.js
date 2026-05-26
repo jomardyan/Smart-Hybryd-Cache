@@ -1,9 +1,47 @@
 (function () {
 	'use strict';
 
-	/* Prevent the browser from scrolling to the hash target (tab panel). */
-	if (window.location.hash.indexOf('#shc-tab-') === 0) {
-		window.scrollTo(0, 0);
+	function getTabFromUrl() {
+		var url;
+
+		try {
+			url = new URL(window.location.href);
+		} catch (e) {
+			return '';
+		}
+
+		return url.searchParams.get('shc_tab') || '';
+	}
+
+	function getTabFromHash() {
+		if (window.location.hash.indexOf('#shc-tab-') !== 0) {
+			return '';
+		}
+
+		return window.location.hash.replace('#shc-tab-', '');
+	}
+
+	function updateUrl(tab) {
+		var url;
+
+		if (!window.history || !window.history.replaceState) {
+			return;
+		}
+
+		try {
+			url = new URL(window.location.href);
+		} catch (e) {
+			return;
+		}
+
+		if (tab && tab !== 'general') {
+			url.searchParams.set('shc_tab', tab);
+		} else {
+			url.searchParams.delete('shc_tab');
+		}
+
+		url.hash = '';
+		window.history.replaceState(null, '', url.toString());
 	}
 
 	function activateTab(tab) {
@@ -25,14 +63,12 @@
 			submit.hidden = ['actions', 'monitoring', 'docs'].indexOf(tab) !== -1;
 		}
 
-		if (window.history && window.history.replaceState) {
-			window.history.replaceState(null, '', '#shc-tab-' + tab);
-		}
+		updateUrl(tab);
 	}
 
 	document.addEventListener('DOMContentLoaded', function () {
 		var tabs = document.querySelectorAll('.smart-hybrid-cache [data-shc-tab]');
-		var initial = window.location.hash.replace('#shc-tab-', '') || 'general';
+		var initial = getTabFromUrl() || getTabFromHash() || 'general';
 
 		tabs.forEach(function (tab) {
 			tab.addEventListener('click', function (e) {
@@ -40,10 +76,9 @@
 				activateTab(tab.getAttribute('data-shc-tab'));
 			});
 		});
-
 		if (document.getElementById('shc-tab-' + initial)) {
 			activateTab(initial);
-			window.scrollTo(0, 0);
+			activateTab(initial);
 		}
 	});
 }());
