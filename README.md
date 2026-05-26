@@ -1,5 +1,12 @@
 # Smart Hybrid Cache
 
+[![Build Plugin ZIP](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/build-plugin.yml/badge.svg)](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/build-plugin.yml)
+[![Lint](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/lint.yml/badge.svg)](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/lint.yml)
+[![Plugin Check](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/plugin-check.yml/badge.svg)](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/plugin-check.yml)
+[![PHP 8.0+](https://img.shields.io/badge/PHP-8.0%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![WordPress 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759B?logo=wordpress&logoColor=white)](https://wordpress.org/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 Persistent WordPress object caching with **Redis** or **Memcached**, safe fallbacks, admin controls, diagnostics, and WP-CLI support.
 
 ## Overview
@@ -103,6 +110,7 @@ make build
 make build-versioned
 make set-version VERSION=1.2.0
 make release
+make ci
 make clean
 make tree
 ```
@@ -116,6 +124,7 @@ make tree
 - `make build-versioned` — creates `build/smart-hybrid-cache-<version>.zip`
 - `make set-version VERSION=1.2.0` — updates plugin metadata before packaging a release
 - `make release` — creates both standard and versioned ZIP artifacts
+- `make ci` — runs lint followed by build (used by CI pipeline)
 - `make clean` — removes the build directory
 - `make tree` — prints the plugin file tree
 
@@ -146,14 +155,22 @@ The intended release flow is:
 
 ## GitHub Actions
 
-This repository includes a GitHub Actions workflow that:
+This repository includes two GitHub Actions workflows:
+
+### Lint (`lint.yml`)
+
+Runs on push to `main` and on pull requests. Tests PHP syntax compatibility across PHP 8.0, 8.1, 8.2, and 8.3.
+
+### Build Plugin ZIP (`build-plugin.yml`)
+
+Runs on push to `main`, pull requests, release events, and manual dispatch. This workflow:
 
 - checks out the repository
 - sets up PHP 8.2
 - optionally bumps plugin version metadata for release packaging
-- builds standalone release ZIPs
+- builds standalone and versioned release ZIPs
 - uploads the installable plugin artifact
-- attaches release ZIPs to GitHub releases
+- attaches both release ZIPs to GitHub releases
 
 ## WP-CLI Support
 

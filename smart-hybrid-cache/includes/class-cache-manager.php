@@ -3,10 +3,18 @@
  * Cache engine orchestration and invalidation.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Manager
+ *
+ * Manages cache engine connections, invalidation hooks, and flush operations.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Manager {
 private array $options;
 private string $active_engine = 'none';

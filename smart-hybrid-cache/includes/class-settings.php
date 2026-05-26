@@ -3,10 +3,18 @@
  * Settings storage and sanitization.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Settings
+ *
+ * Manages plugin option storage, defaults, and sanitization.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Settings {
 public const ENGINES = array( 'auto', 'redis', 'memcached', 'disabled' );
 

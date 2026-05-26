@@ -3,10 +3,18 @@
  * Memcached backend wrapper.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Memcached_Client
+ *
+ * Connects to Memcached and provides get/set/delete/flush operations.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Memcached_Client {
 private ?Memcached $memcached = null;
 private string $last_error = '';

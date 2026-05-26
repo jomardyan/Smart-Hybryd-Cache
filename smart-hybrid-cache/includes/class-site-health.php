@@ -3,10 +3,18 @@
  * WordPress Site Health integration.
  *
  * @package SmartHybridCache
+ * @since   1.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Site_Health
+ *
+ * Registers Site Health tests and debug information panels.
+ *
+ * @since 1.1.0
+ */
 class Smart_Hybrid_Cache_Site_Health {
 	public static function register(): void {
 		add_filter( 'site_status_tests', array( __CLASS__, 'tests' ) );

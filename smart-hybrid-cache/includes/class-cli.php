@@ -3,10 +3,18 @@
  * WP-CLI commands.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_CLI
+ *
+ * Provides WP-CLI commands for cache management and diagnostics.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_CLI {
 public static function register(): void {
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! class_exists( 'WP_CLI' ) ) {

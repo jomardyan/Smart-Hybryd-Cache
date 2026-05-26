@@ -3,10 +3,18 @@
  * Admin UI.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Admin
+ *
+ * Provides the WordPress admin settings interface.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Admin {
 private Smart_Hybrid_Cache_Manager $manager;
 private string $page = 'smart-hybrid-cache';
@@ -237,11 +245,14 @@ $tabs = array(
 }
 
 private function render_redirect_notice(): void {
-if ( empty( $_GET['shc_notice'] ) ) {
-return;
-}
-$type = isset( $_GET['shc_type'] ) && 'error' === $_GET['shc_type'] ? 'notice-error' : 'notice-success';
-printf( '<div class="notice %1$s is-dismissible"><p>%2$s</p></div>', esc_attr( $type ), esc_html( sanitize_text_field( wp_unslash( $_GET['shc_notice'] ) ) ) );
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only; nonce verified during the action that set these query args.
+	if ( empty( $_GET['shc_notice'] ) ) {
+		return;
+	}
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$type = isset( $_GET['shc_type'] ) && 'error' === $_GET['shc_type'] ? 'notice-error' : 'notice-success';
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	printf( '<div class="notice %1$s is-dismissible"><p>%2$s</p></div>', esc_attr( $type ), esc_html( sanitize_text_field( wp_unslash( $_GET['shc_notice'] ) ) ) );
 }
 
 private function render_cache_availability_notice( array $status ): void {

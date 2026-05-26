@@ -3,10 +3,18 @@
  * Lightweight plugin event logging.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Logger
+ *
+ * Records plugin events to the options table.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Logger {
 	private const MAX_EVENTS = 50;
 	private static bool $writing = false;

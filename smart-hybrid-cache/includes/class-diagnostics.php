@@ -3,10 +3,18 @@
  * Diagnostics snapshot builder.
  *
  * @package SmartHybridCache
+ * @since   1.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Diagnostics
+ *
+ * Builds a diagnostics snapshot for support and debugging.
+ *
+ * @since 1.1.0
+ */
 class Smart_Hybrid_Cache_Diagnostics {
 	public static function snapshot(): array {
 		global $wp_version;
@@ -53,7 +61,11 @@ class Smart_Hybrid_Cache_Diagnostics {
 		if ( ! file_exists( $target ) || ! is_readable( $target ) ) {
 			return 'not_installed';
 		}
-		$contents = (string) @file_get_contents( $target );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading local file only.
+		$contents = file_get_contents( $target );
+		if ( false === $contents ) {
+			return 'unknown';
+		}
 		if ( preg_match( '/SMART_HYBRID_CACHE_DROPIN_VERSION[^\\d]+([\\d.]+)/', $contents, $m ) ) {
 			return $m[1];
 		}

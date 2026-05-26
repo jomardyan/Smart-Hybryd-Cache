@@ -3,10 +3,18 @@
  * Redis backend wrapper.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Redis_Client
+ *
+ * Connects to Redis and provides get/set/delete/flush operations.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Redis_Client {
 private ?Redis $redis = null;
 private string $last_error = '';
