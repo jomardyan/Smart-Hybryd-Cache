@@ -18,13 +18,15 @@ if ( $remove && file_exists( $target ) && is_readable( $target ) ) {
 if ( ! function_exists( 'WP_Filesystem' ) ) {
 require_once ABSPATH . 'wp-admin/includes/file.php';
 }
-if ( WP_Filesystem() ) {
+if ( WP_Filesystem( false, WP_CONTENT_DIR, true ) ) {
 global $wp_filesystem;
 $header = $wp_filesystem->get_contents( $target );
-$header = false !== $header ? substr( (string) $header, 0, 2048 ) : '';
-if ( false !== strpos( $header, 'Smart Hybrid Cache Drop-In' ) ) {
-wp_delete_file( $target );
+$header = false !== $header ? substr( (string) $header, 0, 2048 ) : false;
+} else {
+$header = file_get_contents( $target, false, null, 0, 2048 );
 }
+if ( false !== strpos( (string) $header, 'Smart Hybrid Cache Drop-In' ) ) {
+	wp_delete_file( $target );
 }
 }
 

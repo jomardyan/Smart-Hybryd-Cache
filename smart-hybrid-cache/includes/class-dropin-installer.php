@@ -26,7 +26,10 @@ global $wp_filesystem;
 if ( ! function_exists( 'WP_Filesystem' ) ) {
 require_once ABSPATH . 'wp-admin/includes/file.php';
 }
-if ( ! WP_Filesystem() ) {
+if ( ! WP_Filesystem( false, WP_CONTENT_DIR, true ) ) {
+return false;
+}
+if ( ! ( $wp_filesystem instanceof WP_Filesystem_Base ) ) {
 return false;
 }
 return $wp_filesystem;
