@@ -11,7 +11,6 @@
  * License:     GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: smart-hybrid-cache
- * Domain Path: /languages
  *
  * @package SmartHybridCache
  * @since   1.0.0

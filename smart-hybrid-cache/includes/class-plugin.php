@@ -19,7 +19,6 @@ class Smart_Hybrid_Cache_Plugin {
 private static ?Smart_Hybrid_Cache_Manager $manager = null;
 
 public static function init(): void {
-load_plugin_textdomain( 'smart-hybrid-cache', false, dirname( SMART_HYBRID_CACHE_BASENAME ) . '/languages' );
 Smart_Hybrid_Cache_Settings::ensure_defaults();
 Smart_Hybrid_Cache_Settings::register();
 
