@@ -100,25 +100,124 @@ width: 280px;
 }
 .smart-hybrid-cache .shc-monitoring-grid {
 display: grid;
-gap: 12px;
-grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+gap: 16px;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 margin: 16px 0 24px;
 }
 .smart-hybrid-cache .shc-monitoring-card {
 background: #fff;
 border: 1px solid #dcdcde;
-padding: 16px;
+border-radius: 8px;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+padding: 18px;
+position: relative;
+overflow: hidden;
+}
+.smart-hybrid-cache .shc-monitoring-card::before {
+content: '';
+display: block;
+height: 4px;
+left: 0;
+position: absolute;
+right: 0;
+top: 0;
+}
+.smart-hybrid-cache .shc-monitoring-card.shc-mon-online::before {
+background: #00a32a;
+}
+.smart-hybrid-cache .shc-monitoring-card.shc-mon-offline::before {
+background: #cc1818;
+}
+.smart-hybrid-cache .shc-monitoring-card.shc-mon-neutral::before {
+background: #2271b1;
 }
 .smart-hybrid-cache .shc-monitoring-card span {
 color: #646970;
 display: block;
-font-size: 12px;
-margin-bottom: 6px;
+font-size: 11px;
+letter-spacing: 0.5px;
+margin-bottom: 8px;
 text-transform: uppercase;
 }
 .smart-hybrid-cache .shc-monitoring-card strong {
 display: block;
-font-size: 20px;
+font-size: 22px;
+font-weight: 700;
+}
+.smart-hybrid-cache .shc-monitoring-card .shc-card-icon {
+color: #a7aaad;
+float: right;
+font-size: 28px;
+margin-top: -4px;
+}
+/* Hit-rate progress bar */
+.smart-hybrid-cache .shc-progress {
+background: #f0f0f1;
+border-radius: 4px;
+height: 8px;
+margin-top: 10px;
+overflow: hidden;
+width: 100%;
+}
+.smart-hybrid-cache .shc-progress-bar {
+border-radius: 4px;
+height: 100%;
+transition: width 0.5s ease;
+}
+.smart-hybrid-cache .shc-progress-bar.shc-bar-good {
+background: linear-gradient(90deg, #00a32a, #47c747);
+}
+.smart-hybrid-cache .shc-progress-bar.shc-bar-warn {
+background: linear-gradient(90deg, #dba617, #f0c33c);
+}
+.smart-hybrid-cache .shc-progress-bar.shc-bar-bad {
+background: linear-gradient(90deg, #cc1818, #e65454);
+}
+/* Parsed stats sections */
+.smart-hybrid-cache .shc-stats-sections {
+display: grid;
+gap: 16px;
+grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+margin: 16px 0 24px;
+}
+.smart-hybrid-cache .shc-stats-section {
+background: #fff;
+border: 1px solid #dcdcde;
+border-radius: 8px;
+overflow: hidden;
+}
+.smart-hybrid-cache .shc-stats-section h4 {
+background: #f6f7f7;
+border-bottom: 1px solid #dcdcde;
+font-size: 13px;
+margin: 0;
+padding: 10px 14px;
+text-transform: uppercase;
+letter-spacing: 0.3px;
+}
+.smart-hybrid-cache .shc-stats-section table {
+border-spacing: 0;
+width: 100%;
+}
+.smart-hybrid-cache .shc-stats-section th,
+.smart-hybrid-cache .shc-stats-section td {
+border-bottom: 1px solid #f0f0f1;
+font-size: 13px;
+padding: 8px 14px;
+text-align: left;
+}
+.smart-hybrid-cache .shc-stats-section th {
+color: #646970;
+font-weight: 400;
+width: 50%;
+}
+.smart-hybrid-cache .shc-stats-section td {
+font-family: monospace;
+font-weight: 600;
+}
+.smart-hybrid-cache .shc-stats-section tr:last-child th,
+.smart-hybrid-cache .shc-stats-section tr:last-child td {
+border-bottom: none;
 }
 .smart-hybrid-cache .shc-log th,
 .smart-hybrid-cache .shc-log td {

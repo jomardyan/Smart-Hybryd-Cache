@@ -334,25 +334,66 @@ __( 'Object cache file owner status', 'smart-hybrid-cache' )   => $status['dropi
 __( 'Multisite status', 'smart-hybrid-cache' )                => $status['multisite'] ? __( 'Enabled', 'smart-hybrid-cache' ) : __( 'Single site', 'smart-hybrid-cache' ),
 __( 'advanced-cache.php detected', 'smart-hybrid-cache' )      => $status['advanced_cache_exists'] ? __( 'Yes', 'smart-hybrid-cache' ) : __( 'No', 'smart-hybrid-cache' ),
 );
+
+$is_online = 'none' !== $status['active_engine'];
+$hit_rate_raw = 0;
+if ( ! empty( $monitoring['raw_counters'] ) ) {
+$hits  = (int) $monitoring['raw_counters']['hits'];
+$miss  = (int) $monitoring['raw_counters']['misses'];
+$total = $hits + $miss;
+if ( $total > 0 ) {
+$hit_rate_raw = round( ( $hits / $total ) * 100, 1 );
+}
+}
+$bar_class = $hit_rate_raw >= 80 ? 'shc-bar-good' : ( $hit_rate_raw >= 50 ? 'shc-bar-warn' : 'shc-bar-bad' );
 ?>
 <h2><?php esc_html_e( 'Monitoring', 'smart-hybrid-cache' ); ?></h2>
 <div class="shc-monitoring-grid">
-<?php
-$cards = array(
-__( 'Connection', 'smart-hybrid-cache' ) => $monitoring['status'],
-__( 'Memory used', 'smart-hybrid-cache' ) => $monitoring['memory'],
-__( 'Uptime', 'smart-hybrid-cache' ) => $monitoring['uptime'],
-__( 'Hit rate', 'smart-hybrid-cache' ) => $monitoring['hit_rate'],
-__( 'Current keys', 'smart-hybrid-cache' ) => $monitoring['key_count'],
-__( 'Connections', 'smart-hybrid-cache' ) => $monitoring['connections'],
-);
-foreach ( $cards as $label => $value ) :
-?>
-<div class="shc-monitoring-card">
-<span><?php echo esc_html( $label ); ?></span>
-<strong><?php echo esc_html( (string) $value ); ?></strong>
+<div class="shc-monitoring-card <?php echo $is_online ? 'shc-mon-online' : 'shc-mon-offline'; ?>">
+<span class="shc-card-icon"><?php echo $is_online ? '&#9679;' : '&#9675;'; ?></span>
+<span><?php esc_html_e( 'Connection', 'smart-hybrid-cache' ); ?></span>
+<strong><?php echo esc_html( (string) $monitoring['status'] ); ?></strong>
 </div>
-<?php endforeach; ?>
+<div class="shc-monitoring-card shc-mon-neutral">
+<span class="shc-card-icon">&#128190;</span>
+<span><?php esc_html_e( 'Memory used', 'smart-hybrid-cache' ); ?></span>
+<strong><?php echo esc_html( (string) $monitoring['memory'] ); ?></strong>
+</div>
+<div class="shc-monitoring-card shc-mon-neutral">
+<span class="shc-card-icon">&#9200;</span>
+<span><?php esc_html_e( 'Uptime', 'smart-hybrid-cache' ); ?></span>
+<strong><?php echo esc_html( (string) $monitoring['uptime'] ); ?></strong>
+</div>
+<div class="shc-monitoring-card <?php echo $hit_rate_raw >= 80 ? 'shc-mon-online' : ( $hit_rate_raw >= 50 ? 'shc-mon-neutral' : 'shc-mon-offline' ); ?>">
+<span class="shc-card-icon">&#127919;</span>
+<span><?php esc_html_e( 'Hit rate', 'smart-hybrid-cache' ); ?></span>
+<strong><?php echo esc_html( (string) $monitoring['hit_rate'] ); ?></strong>
+<?php if ( $is_online && ! empty( $monitoring['raw_counters'] ) ) : ?>
+<div class="shc-progress"><div class="shc-progress-bar <?php echo esc_attr( $bar_class ); ?>" style="width:<?php echo esc_attr( (string) $hit_rate_raw ); ?>%"></div></div>
+<?php endif; ?>
+</div>
+<div class="shc-monitoring-card shc-mon-neutral">
+<span class="shc-card-icon">&#128273;</span>
+<span><?php esc_html_e( 'Current keys', 'smart-hybrid-cache' ); ?></span>
+<strong><?php echo esc_html( (string) $monitoring['key_count'] ); ?></strong>
+</div>
+<div class="shc-monitoring-card shc-mon-neutral">
+<span class="shc-card-icon">&#128279;</span>
+<span><?php esc_html_e( 'Connections', 'smart-hybrid-cache' ); ?></span>
+<strong><?php echo esc_html( (string) $monitoring['connections'] ); ?></strong>
+</div>
+<?php if ( ! empty( $monitoring['raw_counters'] ) ) : ?>
+<div class="shc-monitoring-card shc-mon-online">
+<span class="shc-card-icon">&#9989;</span>
+<span><?php esc_html_e( 'Cache hits', 'smart-hybrid-cache' ); ?></span>
+<strong><?php echo esc_html( number_format_i18n( (int) $monitoring['raw_counters']['hits'] ) ); ?></strong>
+</div>
+<div class="shc-monitoring-card shc-mon-offline">
+<span class="shc-card-icon">&#10060;</span>
+<span><?php esc_html_e( 'Cache misses', 'smart-hybrid-cache' ); ?></span>
+<strong><?php echo esc_html( number_format_i18n( (int) $monitoring['raw_counters']['misses'] ) ); ?></strong>
+</div>
+<?php endif; ?>
 </div>
 
 <h3><?php esc_html_e( 'Current Status', 'smart-hybrid-cache' ); ?></h3>
@@ -362,8 +403,8 @@ foreach ( $cards as $label => $value ) :
 <?php endforeach; ?>
 </tbody></table>
 <?php if ( ! empty( $status['stats'] ) ) : ?>
-<h3><?php esc_html_e( 'Basic Cache Statistics', 'smart-hybrid-cache' ); ?></h3>
-<pre><?php echo esc_html( wp_json_encode( $status['stats'], JSON_PRETTY_PRINT ) ); ?></pre>
+<h3><?php esc_html_e( 'Cache Statistics', 'smart-hybrid-cache' ); ?></h3>
+<?php $this->render_parsed_stats( $status['stats'], $status['active_engine'] ); ?>
 <?php endif; ?>
 <h3><?php esc_html_e( 'Recent Event Log', 'smart-hybrid-cache' ); ?></h3>
 <?php if ( empty( $status['log_events'] ) ) : ?>
@@ -386,6 +427,134 @@ foreach ( $cards as $label => $value ) :
 </tbody></table>
 <?php endif; ?>
 <?php
+}
+
+private function render_parsed_stats( array $stats, string $engine ): void {
+$sections = $this->categorize_stats( $stats, $engine );
+?>
+<div class="shc-stats-sections">
+<?php foreach ( $sections as $section_label => $items ) : ?>
+<div class="shc-stats-section">
+<h4><?php echo esc_html( $section_label ); ?></h4>
+<table><tbody>
+<?php foreach ( $items as $key => $value ) : ?>
+<tr><th><?php echo esc_html( $this->humanize_stat_key( $key ) ); ?></th><td><?php echo esc_html( (string) $value ); ?></td></tr>
+<?php endforeach; ?>
+</tbody></table>
+</div>
+<?php endforeach; ?>
+</div>
+<?php
+}
+
+private function categorize_stats( array $stats, string $engine ): array {
+if ( 'redis' === $engine ) {
+return $this->categorize_redis_stats( $stats );
+}
+if ( 'memcached' === $engine ) {
+return $this->categorize_memcached_stats( $stats );
+}
+return array( __( 'Raw stats', 'smart-hybrid-cache' ) => $stats );
+}
+
+private function categorize_redis_stats( array $stats ): array {
+$categories = array(
+__( 'Server', 'smart-hybrid-cache' )      => array( 'redis_version', 'redis_mode', 'os', 'tcp_port', 'uptime_in_seconds', 'uptime_in_days', 'process_id', 'run_id', 'config_file' ),
+__( 'Memory', 'smart-hybrid-cache' )      => array( 'used_memory', 'used_memory_human', 'used_memory_peak', 'used_memory_peak_human', 'used_memory_rss', 'used_memory_rss_human', 'maxmemory', 'maxmemory_human', 'maxmemory_policy', 'mem_fragmentation_ratio' ),
+__( 'Clients', 'smart-hybrid-cache' )     => array( 'connected_clients', 'blocked_clients', 'tracking_clients', 'clients_in_timeout_table' ),
+__( 'Performance', 'smart-hybrid-cache' ) => array( 'keyspace_hits', 'keyspace_misses', 'total_commands_processed', 'total_connections_received', 'instantaneous_ops_per_sec', 'rejected_connections', 'expired_keys', 'evicted_keys' ),
+__( 'Persistence', 'smart-hybrid-cache' ) => array( 'rdb_changes_since_last_save', 'rdb_last_save_time', 'rdb_last_bgsave_status', 'aof_enabled', 'aof_last_bgrewrite_status' ),
+__( 'Replication', 'smart-hybrid-cache' ) => array( 'role', 'connected_slaves', 'repl_backlog_active' ),
+);
+
+$sections = array();
+$used     = array();
+
+foreach ( $categories as $label => $keys ) {
+$items = array();
+foreach ( $keys as $key ) {
+if ( isset( $stats[ $key ] ) && ! is_array( $stats[ $key ] ) ) {
+$items[ $key ] = $stats[ $key ];
+$used[ $key ]  = true;
+}
+}
+if ( ! empty( $items ) ) {
+$sections[ $label ] = $items;
+}
+}
+
+// Keyspace databases.
+$keyspace = array();
+foreach ( $stats as $key => $value ) {
+if ( str_starts_with( $key, 'db' ) && ! isset( $used[ $key ] ) ) {
+$keyspace[ $key ] = is_array( $value ) ? implode( ', ', array_map( fn( $k, $v ) => "$k=$v", array_keys( $value ), $value ) ) : (string) $value;
+$used[ $key ]     = true;
+}
+}
+if ( ! empty( $keyspace ) ) {
+$sections[ __( 'Keyspace', 'smart-hybrid-cache' ) ] = $keyspace;
+}
+
+// Remaining.
+$other = array();
+foreach ( $stats as $key => $value ) {
+if ( ! isset( $used[ $key ] ) && ! is_array( $value ) ) {
+$other[ $key ] = $value;
+}
+}
+if ( ! empty( $other ) ) {
+$sections[ __( 'Other', 'smart-hybrid-cache' ) ] = $other;
+}
+
+return $sections;
+}
+
+private function categorize_memcached_stats( array $stats ): array {
+// Memcached stats are per-server arrays.
+$server_stats = is_array( reset( $stats ) ) ? reset( $stats ) : $stats;
+if ( ! is_array( $server_stats ) ) {
+return array( __( 'Raw stats', 'smart-hybrid-cache' ) => $stats );
+}
+
+$categories = array(
+__( 'Server', 'smart-hybrid-cache' )      => array( 'version', 'pid', 'uptime', 'time', 'pointer_size', 'libevent' ),
+__( 'Memory', 'smart-hybrid-cache' )      => array( 'bytes', 'limit_maxbytes', 'bytes_read', 'bytes_written' ),
+__( 'Connections', 'smart-hybrid-cache' ) => array( 'curr_connections', 'total_connections', 'connection_structures', 'threads' ),
+__( 'Performance', 'smart-hybrid-cache' ) => array( 'cmd_get', 'cmd_set', 'get_hits', 'get_misses', 'delete_hits', 'delete_misses', 'incr_hits', 'incr_misses', 'decr_hits', 'decr_misses', 'evictions', 'reclaimed' ),
+__( 'Items', 'smart-hybrid-cache' )       => array( 'curr_items', 'total_items' ),
+);
+
+$sections = array();
+$used     = array();
+
+foreach ( $categories as $label => $keys ) {
+$items = array();
+foreach ( $keys as $key ) {
+if ( isset( $server_stats[ $key ] ) ) {
+$items[ $key ] = $server_stats[ $key ];
+$used[ $key ]  = true;
+}
+}
+if ( ! empty( $items ) ) {
+$sections[ $label ] = $items;
+}
+}
+
+$other = array();
+foreach ( $server_stats as $key => $value ) {
+if ( ! isset( $used[ $key ] ) && ! is_array( $value ) ) {
+$other[ $key ] = $value;
+}
+}
+if ( ! empty( $other ) ) {
+$sections[ __( 'Other', 'smart-hybrid-cache' ) ] = $other;
+}
+
+return $sections;
+}
+
+private function humanize_stat_key( string $key ): string {
+return ucfirst( str_replace( array( '_', '-' ), ' ', $key ) );
 }
 
 private function field_name( string $key ): string {
