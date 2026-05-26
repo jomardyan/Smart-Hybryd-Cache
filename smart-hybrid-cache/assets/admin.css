@@ -101,6 +101,35 @@ margin-bottom: 4px;
 .smart-hybrid-cache .shc-status th {
 width: 280px;
 }
+.smart-hybrid-cache .shc-docs-grid {
+display: grid;
+gap: 16px;
+grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+margin-top: 18px;
+}
+.smart-hybrid-cache .shc-doc-card {
+background: #fff;
+border: 1px solid #dcdcde;
+border-radius: 4px;
+padding: 16px 18px;
+}
+.smart-hybrid-cache .shc-doc-card h3 {
+margin-top: 0;
+}
+.smart-hybrid-cache .shc-doc-card pre {
+background: #1d2327;
+border: 0;
+border-radius: 4px;
+color: #f0f0f1;
+max-height: none;
+white-space: pre-wrap;
+}
+.smart-hybrid-cache .shc-doc-card code {
+background: transparent;
+color: inherit;
+font-size: 12px;
+padding: 0;
+}
 .smart-hybrid-cache .shc-monitoring-grid {
 display: grid;
 gap: 12px;
