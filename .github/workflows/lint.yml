@@ -22,11 +22,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up PHP ${{ matrix.php-version }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-version }}
-          coverage: none
-
-      - name: Run PHP lint
-        run: make lint
+      - name: Run PHP ${{ matrix.php-version }} lint
+        run: |
+          docker run --rm \
+            -v "$PWD:/app" \
+            -w /app \
+            php:${{ matrix.php-version }}-cli \
+            sh -c 'find smart-hybrid-cache -name "*.php" -type f -print0 | sort -z | xargs -0 -n1 php -l'

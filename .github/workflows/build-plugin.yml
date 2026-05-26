@@ -25,14 +25,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          coverage: none
-
-      - name: Install ZIP utility
+      - name: Verify PHP and install ZIP utility
         run: |
+          php -v
           sudo apt-get update
           sudo apt-get install -y zip
 
