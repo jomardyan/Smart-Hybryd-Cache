@@ -3,10 +3,18 @@
  * Main plugin loader.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Plugin
+ *
+ * Bootstraps the Smart Hybrid Cache plugin.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Plugin {
 private static ?Smart_Hybrid_Cache_Manager $manager = null;
 

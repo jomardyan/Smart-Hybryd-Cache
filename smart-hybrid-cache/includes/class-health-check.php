@@ -3,10 +3,18 @@
  * Runtime status collection.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Health_Check
+ *
+ * Collects runtime cache status and monitoring metrics.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Health_Check {
 public static function get_status( ?Smart_Hybrid_Cache_Manager $manager = null ): array {
 $options = Smart_Hybrid_Cache_Settings::get_options();

@@ -29,7 +29,7 @@ if ( version_compare( normalize_version_for_compare( $version ), normalize_versi
 replace_in_file(
 	$plugin_file,
 	array(
-		'/^ \* Version:\s*.+$/m' => ' * Version: ' . $version,
+		'/^ \* Version:\s*.+$/m' => ' * Version:     ' . $version,
 		"/define\( 'SMART_HYBRID_CACHE_VERSION', '[^']+' \);/" => "define( 'SMART_HYBRID_CACHE_VERSION', '" . $version . "' );",
 	)
 );

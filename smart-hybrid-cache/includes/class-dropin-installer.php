@@ -3,10 +3,18 @@
  * Object cache drop-in installer.
  *
  * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Class Smart_Hybrid_Cache_Dropin_Installer
+ *
+ * Manages installation and removal of the object-cache.php drop-in.
+ *
+ * @since 1.0.0
+ */
 class Smart_Hybrid_Cache_Dropin_Installer {
 public static function target(): string {
 return trailingslashit( WP_CONTENT_DIR ) . 'object-cache.php';

@@ -1,16 +1,20 @@
 <?php
 /**
  * Plugin Name: Smart Hybrid Cache
- * Plugin URI: https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached
+ * Plugin URI:  https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached
  * Description: Persistent WordPress object caching with Redis or Memcached, safe fallbacks, admin controls, and WP-CLI support.
- * Version: 1.1.0
+ * Version:     1.1.0
  * Requires at least: 6.0
  * Requires PHP: 8.0
- * Author: Smart Hybrid Cache Contributors
- * License: GPL-3.0-or-later
+ * Author:      Smart Hybrid Cache Contributors
+ * Author URI:  https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached
+ * License:     GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: smart-hybrid-cache
  * Domain Path: /languages
+ *
+ * @package SmartHybridCache
+ * @since   1.0.0
  */
 
 defined( 'ABSPATH' ) || exit;

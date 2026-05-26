@@ -2,6 +2,7 @@
 
 [![Build Plugin ZIP](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/build-plugin.yml/badge.svg)](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/build-plugin.yml)
 [![Lint](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/lint.yml/badge.svg)](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/lint.yml)
+[![Plugin Check](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/plugin-check.yml/badge.svg)](https://github.com/jomardyan/Lolisoft-Smart-Hybryd-Cache-Redis-and-memcached/actions/workflows/plugin-check.yml)
 [![PHP 8.0+](https://img.shields.io/badge/PHP-8.0%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![WordPress 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759B?logo=wordpress&logoColor=white)](https://wordpress.org/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
