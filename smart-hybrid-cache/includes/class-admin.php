@@ -350,47 +350,39 @@ $bar_class = $hit_rate_raw >= 80 ? 'shc-bar-good' : ( $hit_rate_raw >= 50 ? 'shc
 <h2><?php esc_html_e( 'Monitoring', 'smart-hybrid-cache' ); ?></h2>
 <div class="shc-monitoring-grid">
 <div class="shc-monitoring-card <?php echo $is_online ? 'shc-mon-online' : 'shc-mon-offline'; ?>">
-<span class="shc-card-icon"><?php echo $is_online ? '&#9679;' : '&#9675;'; ?></span>
-<span><?php esc_html_e( 'Connection', 'smart-hybrid-cache' ); ?></span>
+<span class="shc-card-label"><?php esc_html_e( 'Connection', 'smart-hybrid-cache' ); ?></span>
 <strong><?php echo esc_html( (string) $monitoring['status'] ); ?></strong>
 </div>
 <div class="shc-monitoring-card shc-mon-neutral">
-<span class="shc-card-icon">&#128190;</span>
-<span><?php esc_html_e( 'Memory used', 'smart-hybrid-cache' ); ?></span>
+<span class="shc-card-label"><?php esc_html_e( 'Memory Used', 'smart-hybrid-cache' ); ?></span>
 <strong><?php echo esc_html( (string) $monitoring['memory'] ); ?></strong>
 </div>
 <div class="shc-monitoring-card shc-mon-neutral">
-<span class="shc-card-icon">&#9200;</span>
-<span><?php esc_html_e( 'Uptime', 'smart-hybrid-cache' ); ?></span>
+<span class="shc-card-label"><?php esc_html_e( 'Uptime', 'smart-hybrid-cache' ); ?></span>
 <strong><?php echo esc_html( (string) $monitoring['uptime'] ); ?></strong>
 </div>
 <div class="shc-monitoring-card <?php echo $hit_rate_raw >= 80 ? 'shc-mon-online' : ( $hit_rate_raw >= 50 ? 'shc-mon-neutral' : 'shc-mon-offline' ); ?>">
-<span class="shc-card-icon">&#127919;</span>
-<span><?php esc_html_e( 'Hit rate', 'smart-hybrid-cache' ); ?></span>
+<span class="shc-card-label"><?php esc_html_e( 'Hit Rate', 'smart-hybrid-cache' ); ?></span>
 <strong><?php echo esc_html( (string) $monitoring['hit_rate'] ); ?></strong>
 <?php if ( $is_online && ! empty( $monitoring['raw_counters'] ) ) : ?>
 <div class="shc-progress"><div class="shc-progress-bar <?php echo esc_attr( $bar_class ); ?>" style="width:<?php echo esc_attr( (string) $hit_rate_raw ); ?>%"></div></div>
 <?php endif; ?>
 </div>
 <div class="shc-monitoring-card shc-mon-neutral">
-<span class="shc-card-icon">&#128273;</span>
-<span><?php esc_html_e( 'Current keys', 'smart-hybrid-cache' ); ?></span>
+<span class="shc-card-label"><?php esc_html_e( 'Current Keys', 'smart-hybrid-cache' ); ?></span>
 <strong><?php echo esc_html( (string) $monitoring['key_count'] ); ?></strong>
 </div>
 <div class="shc-monitoring-card shc-mon-neutral">
-<span class="shc-card-icon">&#128279;</span>
-<span><?php esc_html_e( 'Connections', 'smart-hybrid-cache' ); ?></span>
+<span class="shc-card-label"><?php esc_html_e( 'Connections', 'smart-hybrid-cache' ); ?></span>
 <strong><?php echo esc_html( (string) $monitoring['connections'] ); ?></strong>
 </div>
 <?php if ( ! empty( $monitoring['raw_counters'] ) ) : ?>
 <div class="shc-monitoring-card shc-mon-online">
-<span class="shc-card-icon">&#9989;</span>
-<span><?php esc_html_e( 'Cache hits', 'smart-hybrid-cache' ); ?></span>
+<span class="shc-card-label"><?php esc_html_e( 'Cache Hits', 'smart-hybrid-cache' ); ?></span>
 <strong><?php echo esc_html( number_format_i18n( (int) $monitoring['raw_counters']['hits'] ) ); ?></strong>
 </div>
 <div class="shc-monitoring-card shc-mon-offline">
-<span class="shc-card-icon">&#10060;</span>
-<span><?php esc_html_e( 'Cache misses', 'smart-hybrid-cache' ); ?></span>
+<span class="shc-card-label"><?php esc_html_e( 'Cache Misses', 'smart-hybrid-cache' ); ?></span>
 <strong><?php echo esc_html( number_format_i18n( (int) $monitoring['raw_counters']['misses'] ) ); ?></strong>
 </div>
 <?php endif; ?>
