@@ -222,6 +222,9 @@ $status  = Smart_Hybrid_Cache_Health_Check::get_status( $this->manager );
 <div class="shc-tab-panel" id="shc-tab-monitoring" role="tabpanel" aria-labelledby="shc-tab-button-monitoring" hidden>
 <?php $this->render_status( $status ); ?>
 </div>
+<div class="shc-tab-panel" id="shc-tab-docs" role="tabpanel" aria-labelledby="shc-tab-button-docs" hidden>
+<?php $this->render_docs(); ?>
+</div>
 </div>
 <?php
 }
@@ -234,6 +237,7 @@ $tabs = array(
 'behavior'   => __( 'Behavior', 'smart-hybrid-cache' ),
 'actions'    => __( 'Actions', 'smart-hybrid-cache' ),
 'monitoring' => __( 'Monitoring', 'smart-hybrid-cache' ),
+'docs'       => __( 'Docs', 'smart-hybrid-cache' ),
 );
 ?>
 <nav class="nav-tab-wrapper shc-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Smart Hybrid Cache settings sections', 'smart-hybrid-cache' ); ?>">
@@ -446,6 +450,278 @@ $sections = $this->categorize_stats( $stats, $engine );
 </tbody></table>
 </div>
 <?php endforeach; ?>
+</div>
+<?php
+}
+
+private function render_docs(): void {
+?>
+<div class="shc-docs">
+
+<h2><?php esc_html_e( 'Installation & Configuration Guide', 'smart-hybrid-cache' ); ?></h2>
+<p class="shc-docs-intro"><?php esc_html_e( 'This guide covers installing and configuring Redis and Memcached on a Linux VPS, enabling the required PHP extensions, and connecting them to the Smart Hybrid Cache plugin.', 'smart-hybrid-cache' ); ?></p>
+
+<div class="shc-docs-toc">
+<h3><?php esc_html_e( 'Table of Contents', 'smart-hybrid-cache' ); ?></h3>
+<ol>
+<li><a href="#shc-doc-prerequisites"><?php esc_html_e( 'Prerequisites', 'smart-hybrid-cache' ); ?></a></li>
+<li><a href="#shc-doc-redis-install"><?php esc_html_e( 'Installing Redis on a VPS', 'smart-hybrid-cache' ); ?></a></li>
+<li><a href="#shc-doc-redis-php"><?php esc_html_e( 'Configuring the PHP Redis Extension', 'smart-hybrid-cache' ); ?></a></li>
+<li><a href="#shc-doc-memcached-install"><?php esc_html_e( 'Installing Memcached on a VPS', 'smart-hybrid-cache' ); ?></a></li>
+<li><a href="#shc-doc-memcached-php"><?php esc_html_e( 'Configuring the PHP Memcached Extension', 'smart-hybrid-cache' ); ?></a></li>
+<li><a href="#shc-doc-security"><?php esc_html_e( 'Security Best Practices', 'smart-hybrid-cache' ); ?></a></li>
+<li><a href="#shc-doc-plugin-config"><?php esc_html_e( 'Plugin Configuration', 'smart-hybrid-cache' ); ?></a></li>
+<li><a href="#shc-doc-troubleshooting"><?php esc_html_e( 'Troubleshooting', 'smart-hybrid-cache' ); ?></a></li>
+</ol>
+</div>
+
+<!-- Prerequisites -->
+<div class="shc-docs-section" id="shc-doc-prerequisites">
+<h3><?php esc_html_e( '1. Prerequisites', 'smart-hybrid-cache' ); ?></h3>
+<ul>
+<li><?php esc_html_e( 'A Linux-based VPS (Ubuntu 20.04+, Debian 11+, CentOS/RHEL 8+, or AlmaLinux 8+).', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Root or sudo access to the server.', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'PHP 8.0 or later installed with a supported SAPI (php-fpm or mod_php).', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'WordPress 6.0 or later.', 'smart-hybrid-cache' ); ?></li>
+</ul>
+</div>
+
+<!-- Redis Installation -->
+<div class="shc-docs-section" id="shc-doc-redis-install">
+<h3><?php esc_html_e( '2. Installing Redis on a VPS', 'smart-hybrid-cache' ); ?></h3>
+
+<h4><?php esc_html_e( 'Ubuntu / Debian', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo apt update
+sudo apt install redis-server -y</code></pre>
+<p><?php esc_html_e( 'Enable and start the service:', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo systemctl enable redis-server
+sudo systemctl start redis-server</code></pre>
+
+<h4><?php esc_html_e( 'CentOS / RHEL / AlmaLinux', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo dnf install redis -y</code></pre>
+<p><?php esc_html_e( 'Enable and start the service:', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo systemctl enable redis
+sudo systemctl start redis</code></pre>
+
+<h4><?php esc_html_e( 'Verify Installation', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>redis-cli ping
+# Expected response: PONG</code></pre>
+
+<h4><?php esc_html_e( 'Basic Redis Configuration', 'smart-hybrid-cache' ); ?></h4>
+<p><?php esc_html_e( 'Edit the Redis configuration file:', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo nano /etc/redis/redis.conf</code></pre>
+<p><?php esc_html_e( 'Recommended settings for WordPress object caching:', 'smart-hybrid-cache' ); ?></p>
+<pre><code># Bind to localhost only (security)
+bind 127.0.0.1 ::1
+
+# Set a maximum memory limit
+maxmemory 256mb
+
+# Eviction policy for cache workloads
+maxmemory-policy allkeys-lru
+
+# Set a password (strongly recommended)
+requirepass your_secure_password_here
+
+# Disable persistence for pure cache usage (optional)
+save ""
+appendonly no</code></pre>
+<p><?php esc_html_e( 'Restart Redis after making changes:', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo systemctl restart redis-server</code></pre>
+</div>
+
+<!-- Redis PHP Extension -->
+<div class="shc-docs-section" id="shc-doc-redis-php">
+<h3><?php esc_html_e( '3. Configuring the PHP Redis Extension', 'smart-hybrid-cache' ); ?></h3>
+
+<h4><?php esc_html_e( 'Ubuntu / Debian', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo apt install php-redis -y</code></pre>
+<p><?php esc_html_e( 'For a specific PHP version (e.g., PHP 8.2):', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo apt install php8.2-redis -y</code></pre>
+
+<h4><?php esc_html_e( 'CentOS / RHEL / AlmaLinux (Remi repository)', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo dnf install php-pecl-redis -y</code></pre>
+
+<h4><?php esc_html_e( 'Installing via PECL (any distribution)', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo pecl install redis
+echo "extension=redis.so" | sudo tee /etc/php/8.2/mods-available/redis.ini
+sudo phpenmod redis</code></pre>
+
+<h4><?php esc_html_e( 'Restart PHP-FPM', 'smart-hybrid-cache' ); ?></h4>
+<pre><code># Ubuntu/Debian
+sudo systemctl restart php8.2-fpm
+
+# CentOS/RHEL
+sudo systemctl restart php-fpm</code></pre>
+
+<h4><?php esc_html_e( 'Verify the Extension', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>php -m | grep redis
+# Expected output: redis</code></pre>
+</div>
+
+<!-- Memcached Installation -->
+<div class="shc-docs-section" id="shc-doc-memcached-install">
+<h3><?php esc_html_e( '4. Installing Memcached on a VPS', 'smart-hybrid-cache' ); ?></h3>
+
+<h4><?php esc_html_e( 'Ubuntu / Debian', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo apt update
+sudo apt install memcached libmemcached-tools -y</code></pre>
+<p><?php esc_html_e( 'Enable and start the service:', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo systemctl enable memcached
+sudo systemctl start memcached</code></pre>
+
+<h4><?php esc_html_e( 'CentOS / RHEL / AlmaLinux', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo dnf install memcached -y</code></pre>
+<p><?php esc_html_e( 'Enable and start the service:', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo systemctl enable memcached
+sudo systemctl start memcached</code></pre>
+
+<h4><?php esc_html_e( 'Verify Installation', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>echo "stats" | nc localhost 11211
+# Should return server statistics</code></pre>
+
+<h4><?php esc_html_e( 'Basic Memcached Configuration', 'smart-hybrid-cache' ); ?></h4>
+<p><?php esc_html_e( 'Edit the Memcached configuration file:', 'smart-hybrid-cache' ); ?></p>
+<pre><code># Ubuntu/Debian
+sudo nano /etc/memcached.conf
+
+# CentOS/RHEL
+sudo nano /etc/sysconfig/memcached</code></pre>
+<p><?php esc_html_e( 'Recommended settings (Ubuntu/Debian format):', 'smart-hybrid-cache' ); ?></p>
+<pre><code># Listen on localhost only
+-l 127.0.0.1
+
+# Maximum memory in megabytes
+-m 256
+
+# Maximum simultaneous connections
+-c 1024
+
+# Run as memcache user
+-u memcache
+
+# Port
+-p 11211</code></pre>
+<p><?php esc_html_e( 'Restart Memcached after making changes:', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo systemctl restart memcached</code></pre>
+</div>
+
+<!-- Memcached PHP Extension -->
+<div class="shc-docs-section" id="shc-doc-memcached-php">
+<h3><?php esc_html_e( '5. Configuring the PHP Memcached Extension', 'smart-hybrid-cache' ); ?></h3>
+<p class="shc-docs-note"><strong><?php esc_html_e( 'Important:', 'smart-hybrid-cache' ); ?></strong> <?php esc_html_e( 'This plugin requires the "php-memcached" extension (libmemcached-based), not the older "php-memcache" extension.', 'smart-hybrid-cache' ); ?></p>
+
+<h4><?php esc_html_e( 'Ubuntu / Debian', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo apt install php-memcached -y</code></pre>
+<p><?php esc_html_e( 'For a specific PHP version (e.g., PHP 8.2):', 'smart-hybrid-cache' ); ?></p>
+<pre><code>sudo apt install php8.2-memcached -y</code></pre>
+
+<h4><?php esc_html_e( 'CentOS / RHEL / AlmaLinux (Remi repository)', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo dnf install php-pecl-memcached -y</code></pre>
+
+<h4><?php esc_html_e( 'Installing via PECL (any distribution)', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>sudo pecl install memcached
+echo "extension=memcached.so" | sudo tee /etc/php/8.2/mods-available/memcached.ini
+sudo phpenmod memcached</code></pre>
+
+<h4><?php esc_html_e( 'Restart PHP-FPM', 'smart-hybrid-cache' ); ?></h4>
+<pre><code># Ubuntu/Debian
+sudo systemctl restart php8.2-fpm
+
+# CentOS/RHEL
+sudo systemctl restart php-fpm</code></pre>
+
+<h4><?php esc_html_e( 'Verify the Extension', 'smart-hybrid-cache' ); ?></h4>
+<pre><code>php -m | grep memcached
+# Expected output: memcached</code></pre>
+</div>
+
+<!-- Security -->
+<div class="shc-docs-section" id="shc-doc-security">
+<h3><?php esc_html_e( '6. Security Best Practices', 'smart-hybrid-cache' ); ?></h3>
+<ul>
+<li><strong><?php esc_html_e( 'Bind to localhost:', 'smart-hybrid-cache' ); ?></strong> <?php esc_html_e( 'Never expose Redis or Memcached to the public internet. Always bind to 127.0.0.1.', 'smart-hybrid-cache' ); ?></li>
+<li><strong><?php esc_html_e( 'Use authentication:', 'smart-hybrid-cache' ); ?></strong> <?php esc_html_e( 'Set a strong password for Redis using the "requirepass" directive.', 'smart-hybrid-cache' ); ?></li>
+<li><strong><?php esc_html_e( 'Firewall rules:', 'smart-hybrid-cache' ); ?></strong> <?php esc_html_e( 'Block external access to ports 6379 (Redis) and 11211 (Memcached) using ufw or firewalld.', 'smart-hybrid-cache' ); ?></li>
+<li><strong><?php esc_html_e( 'Disable dangerous commands:', 'smart-hybrid-cache' ); ?></strong> <?php esc_html_e( 'In Redis, rename or disable commands like FLUSHALL, CONFIG, and DEBUG in production.', 'smart-hybrid-cache' ); ?></li>
+<li><strong><?php esc_html_e( 'TLS encryption:', 'smart-hybrid-cache' ); ?></strong> <?php esc_html_e( 'For remote connections, enable TLS in Redis 6+ and configure the plugin TLS option accordingly.', 'smart-hybrid-cache' ); ?></li>
+<li><strong><?php esc_html_e( 'Regular updates:', 'smart-hybrid-cache' ); ?></strong> <?php esc_html_e( 'Keep Redis, Memcached, and PHP extensions up to date with security patches.', 'smart-hybrid-cache' ); ?></li>
+</ul>
+<h4><?php esc_html_e( 'Firewall Examples', 'smart-hybrid-cache' ); ?></h4>
+<pre><code># UFW (Ubuntu/Debian)
+sudo ufw deny 6379
+sudo ufw deny 11211
+
+# Firewalld (CentOS/RHEL)
+sudo firewall-cmd --permanent --remove-port=6379/tcp
+sudo firewall-cmd --permanent --remove-port=11211/tcp
+sudo firewall-cmd --reload</code></pre>
+</div>
+
+<!-- Plugin Configuration -->
+<div class="shc-docs-section" id="shc-doc-plugin-config">
+<h3><?php esc_html_e( '7. Plugin Configuration', 'smart-hybrid-cache' ); ?></h3>
+<p><?php esc_html_e( 'Once Redis or Memcached and the corresponding PHP extension are installed, configure the plugin:', 'smart-hybrid-cache' ); ?></p>
+<ol>
+<li><?php esc_html_e( 'Go to the General tab and select your preferred cache engine (Auto, Redis, or Memcached).', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Configure connection details in the Redis or Memcached tab (host, port, and password if applicable).', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'In the Behavior tab, enable "Persistent object cache drop-in" to activate the object cache.', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Use the Actions tab to test connectivity and install the drop-in file.', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Verify everything is working in the Monitoring tab.', 'smart-hybrid-cache' ); ?></li>
+</ol>
+<h4><?php esc_html_e( 'Recommended Plugin Settings', 'smart-hybrid-cache' ); ?></h4>
+<table class="widefat striped">
+<thead><tr><th><?php esc_html_e( 'Setting', 'smart-hybrid-cache' ); ?></th><th><?php esc_html_e( 'Recommended Value', 'smart-hybrid-cache' ); ?></th><th><?php esc_html_e( 'Notes', 'smart-hybrid-cache' ); ?></th></tr></thead>
+<tbody>
+<tr><td><?php esc_html_e( 'Cache Engine', 'smart-hybrid-cache' ); ?></td><td>Auto</td><td><?php esc_html_e( 'Automatically selects the best available engine.', 'smart-hybrid-cache' ); ?></td></tr>
+<tr><td><?php esc_html_e( 'Default TTL', 'smart-hybrid-cache' ); ?></td><td>3600</td><td><?php esc_html_e( 'One hour; adjust based on content update frequency.', 'smart-hybrid-cache' ); ?></td></tr>
+<tr><td><?php esc_html_e( 'Key Prefix', 'smart-hybrid-cache' ); ?></td><td>shc_</td><td><?php esc_html_e( 'Prevents key collisions in shared environments.', 'smart-hybrid-cache' ); ?></td></tr>
+<tr><td><?php esc_html_e( 'Flush on Post Update', 'smart-hybrid-cache' ); ?></td><td><?php esc_html_e( 'Enabled', 'smart-hybrid-cache' ); ?></td><td><?php esc_html_e( 'Ensures content freshness after edits.', 'smart-hybrid-cache' ); ?></td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- Troubleshooting -->
+<div class="shc-docs-section" id="shc-doc-troubleshooting">
+<h3><?php esc_html_e( '8. Troubleshooting', 'smart-hybrid-cache' ); ?></h3>
+
+<h4><?php esc_html_e( 'PHP extension not detected', 'smart-hybrid-cache' ); ?></h4>
+<p><?php esc_html_e( 'If the plugin reports a missing extension after installation:', 'smart-hybrid-cache' ); ?></p>
+<pre><code># Check loaded modules
+php -m | grep -i redis
+php -m | grep -i memcached
+
+# Verify the .ini file is loaded
+php --ini | grep redis
+php --ini | grep memcached
+
+# Ensure PHP-FPM was restarted (not just CLI PHP)
+sudo systemctl restart php8.2-fpm</code></pre>
+
+<h4><?php esc_html_e( 'Connection refused errors', 'smart-hybrid-cache' ); ?></h4>
+<ul>
+<li><?php esc_html_e( 'Verify the service is running: systemctl status redis-server (or memcached).', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Check the bind address and port in the configuration file.', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Ensure no firewall rule is blocking localhost connections.', 'smart-hybrid-cache' ); ?></li>
+</ul>
+
+<h4><?php esc_html_e( 'Authentication errors (Redis)', 'smart-hybrid-cache' ); ?></h4>
+<ul>
+<li><?php esc_html_e( 'Confirm the password in the plugin matches the "requirepass" value in redis.conf.', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Test manually: redis-cli -a your_password ping', 'smart-hybrid-cache' ); ?></li>
+</ul>
+
+<h4><?php esc_html_e( 'High memory usage', 'smart-hybrid-cache' ); ?></h4>
+<ul>
+<li><?php esc_html_e( 'Set appropriate maxmemory limits in Redis/Memcached configuration.', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Use the "allkeys-lru" eviction policy for Redis to automatically remove least-recently-used keys.', 'smart-hybrid-cache' ); ?></li>
+<li><?php esc_html_e( 'Monitor memory usage in the plugin Monitoring tab.', 'smart-hybrid-cache' ); ?></li>
+</ul>
+
+<h4><?php esc_html_e( 'Drop-in conflicts', 'smart-hybrid-cache' ); ?></h4>
+<p><?php esc_html_e( 'If another plugin has already installed an object-cache.php drop-in, use the "Confirm replacement" checkbox in the Actions tab to replace it, or manually remove the existing wp-content/object-cache.php file before installing.', 'smart-hybrid-cache' ); ?></p>
+</div>
+
 </div>
 <?php
 }

@@ -22,7 +22,7 @@
 		});
 
 		if (submit) {
-			submit.hidden = ['actions', 'monitoring'].indexOf(tab) !== -1;
+			submit.hidden = ['actions', 'monitoring', 'docs'].indexOf(tab) !== -1;
 		}
 
 		if (window.history && window.history.replaceState) {
