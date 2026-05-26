@@ -16,6 +16,22 @@ public static function source(): string {
 return SMART_HYBRID_CACHE_PATH . 'dropins/object-cache.php';
 }
 
+/**
+ * Initialize WP_Filesystem and return the global instance.
+ *
+ * @return WP_Filesystem_Base|false
+ */
+private static function init_filesystem() {
+global $wp_filesystem;
+if ( ! function_exists( 'WP_Filesystem' ) ) {
+require_once ABSPATH . 'wp-admin/includes/file.php';
+}
+if ( ! WP_Filesystem() ) {
+return false;
+}
+return $wp_filesystem;
+}
+
 public static function status(): array {
 $target = self::target();
 $exists = file_exists( $target );
@@ -35,12 +51,18 @@ $availability_message = __( 'Persistent object cache is already available in the
 $availability_message = __( 'WordPress reports that an external object cache is already active in this request.', 'smart-hybrid-cache' );
 }
 
+$fs       = self::init_filesystem();
+$writable = false;
+if ( $fs ) {
+$writable = ( ! $exists && $fs->is_writable( WP_CONTENT_DIR ) ) || ( $exists && $fs->is_writable( $target ) );
+}
+
 return array(
 'exists'      => $exists,
 'owned'       => $owned,
 'active'      => $active,
 'available'   => $available,
-'writable'    => ( ! $exists && is_writable( WP_CONTENT_DIR ) ) || ( $exists && is_writable( $target ) ),
+'writable'    => $writable,
 'path'        => $target,
 'advanced'    => file_exists( trailingslashit( WP_CONTENT_DIR ) . 'advanced-cache.php' ),
 'owner_label' => $owner_label,
@@ -53,13 +75,15 @@ $target = self::target();
 if ( ! file_exists( $target ) || ! is_readable( $target ) ) {
 return false;
 }
-$handle = fopen( $target, 'rb' );
-if ( false === $handle ) {
+$fs = self::init_filesystem();
+if ( ! $fs ) {
 return false;
 }
-$contents = fread( $handle, 2048 );
-fclose( $handle );
-return false !== strpos( (string) $contents, SMART_HYBRID_CACHE_SIGNATURE );
+$contents = $fs->get_contents( $target );
+if ( false === $contents ) {
+return false;
+}
+return false !== strpos( substr( (string) $contents, 0, 2048 ), SMART_HYBRID_CACHE_SIGNATURE );
 }
 
 public static function install( bool $force = false ): WP_Error|bool {
@@ -74,14 +98,20 @@ return new WP_Error( 'dropin_already_installed', __( 'Smart Hybrid Cache object-
 if ( file_exists( $target ) && ! self::is_owned() && ! $force ) {
 return new WP_Error( 'existing_dropin', __( 'Persistent object cache is already available through another plugin or a manual object-cache.php file. Confirm replacement before installing Smart Hybrid Cache.', 'smart-hybrid-cache' ) );
 }
-if ( ! is_writable( WP_CONTENT_DIR ) && ( ! file_exists( $target ) || ! is_writable( $target ) ) ) {
+
+$fs = self::init_filesystem();
+if ( ! $fs ) {
+return new WP_Error( 'filesystem_error', __( 'Unable to initialize the WordPress filesystem.', 'smart-hybrid-cache' ) );
+}
+
+if ( ! $fs->is_writable( WP_CONTENT_DIR ) && ( ! file_exists( $target ) || ! $fs->is_writable( $target ) ) ) {
 return new WP_Error( 'not_writable', __( 'wp-content is not writable.', 'smart-hybrid-cache' ) );
 }
 
-if ( ! copy( $source, $target ) ) {
+if ( ! $fs->copy( $source, $target, true ) ) {
 return new WP_Error( 'copy_failed', __( 'Unable to copy object-cache.php.', 'smart-hybrid-cache' ) );
 }
-@chmod( $target, 0644 );
+$fs->chmod( $target, 0644 );
 return true;
 }
 
@@ -93,9 +123,15 @@ return true;
 if ( ! self::is_owned() && ! $force ) {
 return new WP_Error( 'not_owned', __( 'The existing object-cache.php was not created by this plugin.', 'smart-hybrid-cache' ) );
 }
-if ( ! is_writable( $target ) ) {
+
+$fs = self::init_filesystem();
+if ( ! $fs ) {
+return new WP_Error( 'filesystem_error', __( 'Unable to initialize the WordPress filesystem.', 'smart-hybrid-cache' ) );
+}
+
+if ( ! $fs->is_writable( $target ) ) {
 return new WP_Error( 'not_writable', __( 'object-cache.php is not writable.', 'smart-hybrid-cache' ) );
 }
-return unlink( $target ) ? true : new WP_Error( 'remove_failed', __( 'Unable to remove object-cache.php.', 'smart-hybrid-cache' ) );
+return $fs->delete( $target ) ? true : new WP_Error( 'remove_failed', __( 'Unable to remove object-cache.php.', 'smart-hybrid-cache' ) );
 }
 }
