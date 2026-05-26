@@ -200,8 +200,8 @@ $status  = Smart_Hybrid_Cache_Health_Check::get_status( $this->manager );
 <?php $this->checkbox_row( 'enable_logging', __( 'Enable event logging', 'smart-hybrid-cache' ), $options['enable_logging'] ); ?>
 <?php $this->text_row( 'non_persistent_groups', __( 'Non-persistent groups', 'smart-hybrid-cache' ), $options['non_persistent_groups'] ); ?>
 <?php $this->text_row( 'additional_global_groups', __( 'Additional global groups', 'smart-hybrid-cache' ), $options['additional_global_groups'] ); ?>
-<p class="description"><?php esc_html_e( 'Comma-separated cache group names. Non-persistent groups stay in request-scope memory only. Additional global groups are shared across multisite blogs.', 'smart-hybrid-cache' ); ?></p>
 </tbody></table>
+<p class="description"><?php esc_html_e( 'Comma-separated cache group names. Non-persistent groups stay in request-scope memory only. Additional global groups are shared across multisite blogs.', 'smart-hybrid-cache' ); ?></p>
 </div>
 <div class="shc-settings-submit">
 <?php submit_button( __( 'Save Settings', 'smart-hybrid-cache' ) ); ?>
