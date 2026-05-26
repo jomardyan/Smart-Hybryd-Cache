@@ -1,6 +1,11 @@
 (function () {
 	'use strict';
 
+	/* Prevent the browser from scrolling to the hash target (tab panel). */
+	if (window.location.hash.indexOf('#shc-tab-') === 0) {
+		window.scrollTo(0, 0);
+	}
+
 	function activateTab(tab) {
 		var buttons = document.querySelectorAll('.smart-hybrid-cache [data-shc-tab]');
 		var panels = document.querySelectorAll('.smart-hybrid-cache .shc-tab-panel');
@@ -30,13 +35,15 @@
 		var initial = window.location.hash.replace('#shc-tab-', '') || 'general';
 
 		tabs.forEach(function (tab) {
-			tab.addEventListener('click', function () {
+			tab.addEventListener('click', function (e) {
+				e.preventDefault();
 				activateTab(tab.getAttribute('data-shc-tab'));
 			});
 		});
 
 		if (document.getElementById('shc-tab-' + initial)) {
 			activateTab(initial);
+			window.scrollTo(0, 0);
 		}
 	});
 }());

@@ -15,13 +15,18 @@ $target      = trailingslashit( WP_CONTENT_DIR ) . 'object-cache.php';
 $remove      = is_array( $options ) && ! empty( $options['cleanup_dropin_uninstall'] );
 
 if ( $remove && file_exists( $target ) && is_readable( $target ) ) {
-$handle = fopen( $target, 'rb' );
-$header = false !== $handle ? fread( $handle, 2048 ) : '';
-if ( false !== $handle ) {
-fclose( $handle );
+if ( ! function_exists( 'WP_Filesystem' ) ) {
+require_once ABSPATH . 'wp-admin/includes/file.php';
 }
-if ( false !== strpos( (string) $header, 'Smart Hybrid Cache Drop-In' ) && is_writable( $target ) ) {
-unlink( $target );
+if ( WP_Filesystem( false, WP_CONTENT_DIR, true ) ) {
+global $wp_filesystem;
+$header = $wp_filesystem->get_contents( $target );
+$header = false !== $header ? substr( (string) $header, 0, 2048 ) : false;
+} else {
+$header = file_get_contents( $target, false, null, 0, 2048 );
+}
+if ( false !== strpos( (string) $header, 'Smart Hybrid Cache Drop-In' ) ) {
+	wp_delete_file( $target );
 }
 }
 

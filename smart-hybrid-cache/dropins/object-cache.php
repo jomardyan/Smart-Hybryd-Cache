@@ -302,7 +302,7 @@ $this->non_persistent_groups = array_values( array_unique( $this->non_persistent
 }
 
 public function stats(): void {
-echo htmlspecialchars( 'Smart Hybrid Cache hits: ' . $this->cache_hits . ', misses: ' . $this->cache_misses . ', engine: ' . $this->engine, ENT_QUOTES, 'UTF-8' );
+echo esc_html( 'Smart Hybrid Cache hits: ' . $this->cache_hits . ', misses: ' . $this->cache_misses . ', engine: ' . $this->engine );
 }
 
 private function ensure_group( string $group ): void {
